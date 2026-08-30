@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Thiên Dật Vũ — 天逸宇</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="topbar">
+        <a class="brand" href="https://ankhanh56.github.io/" title="Trang Chủ">
+          <span class="brand-mark">✦</span>
+          <span>Thiên Dật Vũ <b>— 天逸宇</b></span>
+        </a>
+
+        <form class="search" id="smart-search" novalidate>
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input
+            id="search-input"
+            type="search"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Tìm kiếm Google hoặc nhập địa chỉ trang web..."
+            autofocus
+          />
+          <kbd>Enter</kbd>
+        </form>
+
+        <div class="top-actions">
+          <button
+            id="settings-button"
+            class="icon-button"
+            title="Cài đặt truy cập nhanh"
+            aria-label="Cài đặt truy cập nhanh"
+          >
+            ⚙
+          </button>
+        </div>
+      </header>
+
+      <section class="content-grid">
+        <aside class="left-column">
+          <article class="card system-card">
+            <p class="eyebrow">BẢNG ĐIỀU KHIỂN CÁ NHÂN</p>
+            <div class="profile-row">
+              <div class="avatar">天</div>
+              <div>
+                <h1>Thiên Dật Vũ</h1>
+                <p>天逸宇</p>
+              </div>
+            </div>
+            <!-- <div class="system-details">
+            <div><span>Trình duyệt</span><strong>Brave</strong></div>
+            <div><span>Chế độ</span><strong class="online"><i></i> Sẵn sàng</strong></div>
+          </div> -->
+          </article>
+
+          <article class="card calendar-card">
+            <div class="calendar-head">
+              <button id="previous-month" aria-label="Tháng trước">‹</button>
+              <h2 id="calendar-title">Tháng</h2>
+              <button id="next-month" aria-label="Tháng sau">›</button>
+            </div>
+            <div class="weekdays" aria-hidden="true">
+              <span>CN</span><span>T2</span><span>T3</span><span>T4</span
+              ><span>T5</span><span>T6</span><span>T7</span>
+            </div>
+            <div class="calendar-days" id="calendar-days"></div>
+          </article>
+
+          <article class="card quote-card">
+            <span class="quote-mark">“</span>
+            <p id="daily-quote">
+              Tập trung vào điều quan trọng, rồi làm nó thật tốt.
+            </p>
+          </article>
+        </aside>
+
+        <section class="main-column">
+          <article class="card hero-card">
+            <p id="greeting" class="eyebrow">CHÀO BUỔI TỐT LÀNH</p>
+            <time id="clock" class="clock">00:00</time>
+            <p id="full-date" class="full-date">Thứ Hai, ngày 31 tháng 8</p>
+            <div class="hero-line"></div>
+            <p class="hero-note">
+              Mở tab. Giữ nhịp. Hoàn thành việc quan trọng.
+            </p>
+          </article>
+
+          <article class="card weather-card">
+            <div class="weather-main">
+              <div id="weather-icon" class="weather-icon">☀</div>
+              <div>
+                <p class="eyebrow">
+                  THỜI TIẾT ·
+                  <span id="weather-place">Xã Đức Hòa, Tây Ninh</span>
+                </p>
+                <div class="temperature">
+                  <span id="temperature">--</span><sup>°C</sup>
+                </div>
+                <p id="weather-description" class="weather-description">
+                  Đang tải thời tiết...
+                </p>
+              </div>
+            </div>
+            <div class="weather-stats">
+              <div>
+                <span>Cảm giác</span
+                ><strong id="apparent-temperature">--°</strong>
+              </div>
+              <div><span>Độ ẩm</span><strong id="humidity">--%</strong></div>
+              <div>
+                <span>Gió</span><strong id="wind-speed">-- km/h</strong>
+              </div>
+            </div>
+          </article>
+
+          <section class="section-heading">
+            <div>
+              <p class="eyebrow">TRUY CẬP NHANH</p>
+            </div>
+            <span id="site-count" class="site-count">0 trang web</span>
+          </section>
+
+          <div class="site-grid" id="site-grid"></div>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="settings-dialog">
+      <form method="dialog" class="settings-panel" id="settings-form">
+        <div class="settings-head">
+          <div>
+            <p class="eyebrow">TÙY CHỈNH</p>
+            <h2>Truy cập nhanh</h2>
+          </div>
+          <button value="cancel" class="close-button" aria-label="Đóng">
+            ×
+          </button>
+        </div>
+
+        <p class="field-help settings-intro">
+          Thêm các trang bạn thường mở. URL có thể là `facebook.com`,
+          `https://fast.com` hoặc địa chỉ nội bộ như `192.168.1.1`.
+        </p>
+        <div id="site-settings"></div>
+        <button type="button" id="add-site" class="secondary-button">
+          + Thêm trang web
+        </button>
+
+        <div class="settings-actions">
+          <button value="cancel" class="secondary-button">Hủy</button>
+          <button type="submit" value="save" class="primary-button">
+            Lưu thay đổi
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <template id="site-template">
+      <a class="site-card" target="_blank" rel="noreferrer">
+        <div class="site-top">
+          <span class="site-icon"></span>
+          <span class="open-arrow">↗</span>
+        </div>
+        <h3></h3>
+        <p></p>
+      </a>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
