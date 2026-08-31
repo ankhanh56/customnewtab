@@ -12,7 +12,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@500;600;700&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=1.0.6" />
+  <link rel="stylesheet" href="styles.css?v=1.0.7" />
 </head>
 
 <body>
@@ -103,32 +103,43 @@
 
         <div class="site-grid" id="site-grid"></div>
         <section class="section-heading bookmark-heading">
-  <div><p class="eyebrow">BOOKMARK</p></div>
-  <button id="refresh-bookmarks" class="bookmark-refresh" type="button" title="Làm mới bookmark">↻</button>
-</section>
+          <div>
+            <p class="eyebrow">BOOKMARK</p>
+          </div>
+          <button id="refresh-bookmarks" class="bookmark-refresh" type="button" title="Làm mới bookmark">↻</button>
+        </section>
 
-<section class="bookmark-card card">
-  <div class="bookmark-search-wrap">
-    <span class="bookmark-search-icon" aria-hidden="true">⌕</span>
-    <input
-      id="bookmark-search"
-      class="bookmark-search"
-      type="search"
-      autocomplete="off"
-      spellcheck="false"
-      placeholder="Tìm bookmark..."
-      aria-label="Tìm bookmark"
-    />
-    <button id="clear-bookmark-search" class="clear-bookmark-search hidden" type="button" aria-label="Xóa tìm kiếm" title="Xóa tìm kiếm">×</button>
-  </div>
+        <section class="bookmark-card card">
+          <div class="bookmark-search-wrap">
+            <span class="bookmark-search-icon" aria-hidden="true">⌕</span>
+            <input id="bookmark-search" class="bookmark-search" type="search" autocomplete="off" spellcheck="false"
+              placeholder="Tìm bookmark..." aria-label="Tìm bookmark" />
+            <button id="clear-bookmark-search" class="clear-bookmark-search hidden" type="button"
+              aria-label="Xóa tìm kiếm" title="Xóa tìm kiếm">×</button>
+          </div>
 
-  <div id="bookmark-search-result" class="bookmark-search-result hidden"></div>
+          <div id="bookmark-search-result" class="bookmark-search-result hidden"></div>
 
-  <div id="bookmark-tree" class="bookmark-tree">
-    <p class="bookmark-loading">Đang tải bookmark...</p>
-  </div>
-</section>
+          <div id="bookmark-tree" class="bookmark-tree">
+            <p class="bookmark-loading">Đang tải bookmark...</p>
+          </div>
+        </section>
       </section>
+      <aside class="right-column">
+  <article class="card history-card">
+    <div class="history-head">
+      <div>
+        <p class="eyebrow">LỊCH SỬ DUYỆT WEB</p>
+        <p class="history-subtitle">10 trang gần đây</p>
+      </div>
+      <button id="refresh-history" class="history-refresh" type="button" title="Làm mới lịch sử" aria-label="Làm mới lịch sử">↻</button>
+    </div>
+
+    <div id="history-list" class="history-list">
+      <p class="history-loading">Đang tải lịch sử...</p>
+    </div>
+  </article>
+</aside>
     </section>
   </main>
 
@@ -227,29 +238,41 @@
     </article>
   </template>
   <template id="bookmark-folder-template">
-  <details class="bookmark-folder" open>
-    <summary>
-      <span class="folder-arrow">›</span>
-      <span class="folder-icon">▰</span>
-      <span class="bookmark-folder-title"></span>
-      <span class="bookmark-folder-count"></span>
-    </summary>
-    <div class="bookmark-children"></div>
-  </details>
-</template>
+    <details class="bookmark-folder" open>
+      <summary>
+        <span class="folder-arrow">›</span>
+        <span class="folder-icon">▰</span>
+        <span class="bookmark-folder-title"></span>
+        <span class="bookmark-folder-count"></span>
+      </summary>
+      <div class="bookmark-children"></div>
+    </details>
+  </template>
 
-<template id="bookmark-link-template">
-  <a class="bookmark-link" target="_blank" rel="noreferrer">
-    <span class="bookmark-link-icon"></span>
-    <span class="bookmark-link-text">
-      <span class="bookmark-link-title"></span>
-      <span class="bookmark-link-url"></span>
+  <template id="bookmark-link-template">
+    <a class="bookmark-link" target="_blank" rel="noreferrer">
+      <span class="bookmark-link-icon"></span>
+      <span class="bookmark-link-text">
+        <span class="bookmark-link-title"></span>
+        <span class="bookmark-link-url"></span>
+      </span>
+      <span class="bookmark-open">↗</span>
+    </a>
+  </template>
+  <template id="history-item-template">
+  <a class="history-item" rel="noreferrer">
+    <span class="history-icon"></span>
+    <span class="history-text">
+      <span class="history-title"></span>
+      <span class="history-meta">
+        <span class="history-domain"></span>
+        <span class="history-time"></span>
+      </span>
     </span>
-    <span class="bookmark-open">↗</span>
   </a>
 </template>
 
-  <script src="app.js?v=1.0.6"></script>
+  <script src="app.js?v=1.0.7"></script>
 </body>
 
 </html>

@@ -1236,3 +1236,199 @@ body::-webkit-scrollbar {
 .notes-panel::-webkit-scrollbar {
   display: none;
 }
+/* Cột phải: Lịch sử duyệt web */
+.content-grid {
+  grid-template-columns: 250px minmax(0, 1fr) 265px;
+}
+
+.right-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.history-card {
+  overflow: hidden;
+  padding: 15px 11px 10px;
+}
+
+.history-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 5px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.history-subtitle {
+  margin: 4px 0 0;
+  color: #687585;
+  font-size: 10px;
+}
+
+.history-refresh {
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  flex: 0 0 auto;
+  padding: 0;
+  cursor: pointer;
+  border: 1px solid #35404d;
+  border-radius: 8px;
+  color: #91a0af;
+  background: #1b212a;
+  font-size: 17px;
+  transition: .18s;
+}
+
+.history-refresh:hover {
+  border-color: #669274;
+  color: #a8e7b8;
+  background: #24332b;
+}
+
+.history-refresh.is-loading {
+  animation: history-spin .7s linear infinite;
+}
+
+@keyframes history-spin {
+  to { transform: rotate(360deg); }
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 490px;
+  overflow-y: auto;
+  padding-top: 5px;
+}
+
+.history-loading,
+.history-empty {
+  margin: 16px 7px;
+  color: #7c8998;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.history-item {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 6px 7px;
+  border-radius: 9px;
+  transition: background .16s;
+}
+
+.history-item:hover {
+  background: #202832;
+}
+
+.history-icon {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 7px;
+  color: #eff5fa;
+  background: #405168;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.history-icon img {
+  display: block;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.history-text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.history-title,
+.history-domain {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-title {
+  color: #cbd5df;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.history-meta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  color: #718092;
+  font-size: 9px;
+}
+
+.history-domain {
+  min-width: 0;
+  max-width: 145px;
+}
+
+.history-time {
+  flex: 0 0 auto;
+  color: #657484;
+}
+
+/* Ẩn scrollbar lịch sử nhưng vẫn cuộn */
+.history-list {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.history-list::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .content-grid {
+    grid-template-columns: 230px minmax(0, 1fr);
+  }
+
+  .right-column {
+    grid-column: 1 / -1;
+  }
+
+  .history-card {
+    max-width: none;
+  }
+
+  .history-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 8px;
+    max-height: 270px;
+  }
+}
+
+@media (max-width: 720px) {
+  .right-column {
+    display: block;
+  }
+
+  .history-list {
+    display: flex;
+    max-height: 350px;
+  }
+}

@@ -729,6 +729,122 @@ async function importNotesFromJson(event) {
     event.target.value = "";
   }
 }
+const HISTORY_LIMIT = 10;
+
+function isAllowedHistoryUrl(url) {
+  return Boolean(url) && !/^(brave|chrome|chrome-extension|about|file):/i.test(url);
+}
+
+function getHistoryHostname(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./i, "");
+  } catch {
+    return "";
+  }
+}
+
+function getHistoryFaviconUrl(url, size = 32) {
+  const hostname = getHistoryHostname(url);
+  if (!hostname) return "";
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=${size}`;
+}
+
+function formatHistoryTime(timestamp) {
+  const date = new Date(timestamp);
+  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+
+  if (seconds < 60) return "Vừa xong";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}p trước`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}g trước`;
+  if (seconds < 172800) return "Hôm qua";
+
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit"
+  }).format(date);
+}
+
+function setHistoryIcon(element, item) {
+  const fallback = (item.title || getHistoryHostname(item.url) || "?")
+    .trim()
+    .slice(0, 1)
+    .toUpperCase();
+  const faviconUrl = getHistoryFaviconUrl(item.url);
+
+  element.textContent = fallback;
+  if (!faviconUrl) return;
+
+  const image = new Image();
+  image.src = faviconUrl;
+  image.alt = "";
+  image.decoding = "async";
+  image.onload = () => {
+    element.textContent = "";
+    element.appendChild(image);
+  };
+}
+
+function renderHistory(items) {
+  const list = $("#history-list");
+  const template = $("#history-item-template");
+  list.innerHTML = "";
+
+  if (!items.length) {
+    list.innerHTML = `<p class="history-empty">Chưa có trang web phù hợp trong lịch sử.</p>`;
+    return;
+  }
+
+  items.forEach((item) => {
+    const node = template.content.cloneNode(true);
+    const link = node.querySelector(".history-item");
+    const icon = node.querySelector(".history-icon");
+
+    link.href = item.url;
+    link.title = item.title || item.url;
+    node.querySelector(".history-title").textContent = item.title || item.url;
+    node.querySelector(".history-domain").textContent = getHistoryHostname(item.url);
+    node.querySelector(".history-time").textContent = formatHistoryTime(item.lastVisitTime);
+    setHistoryIcon(icon, item);
+    list.appendChild(node);
+  });
+}
+
+function loadRecentHistory() {
+  const refreshButton = $("#refresh-history");
+  refreshButton?.classList.add("is-loading");
+
+  if (!chrome?.history) {
+    $("#history-list").innerHTML = `<p class="history-empty">Extension chưa có quyền đọc lịch sử.</p>`;
+    refreshButton?.classList.remove("is-loading");
+    return;
+  }
+
+  chrome.history.search(
+    {
+      text: "",
+      startTime: 0,
+      maxResults: 100
+    },
+    (results) => {
+      if (chrome.runtime.lastError) {
+        $("#history-list").innerHTML = `<p class="history-empty">Không thể đọc lịch sử: ${chrome.runtime.lastError.message}</p>`;
+      } else {
+        const recent = results
+          .filter((item) => isAllowedHistoryUrl(item.url))
+          .sort((a, b) => (b.lastVisitTime || 0) - (a.lastVisitTime || 0))
+          .slice(0, HISTORY_LIMIT);
+        renderHistory(recent);
+      }
+      refreshButton?.classList.remove("is-loading");
+    }
+  );
+}
+
+function watchHistory() {
+  if (!chrome?.history) return;
+  chrome.history.onVisited.addListener(() => loadRecentHistory());
+  chrome.history.onVisitRemoved.addListener(() => loadRecentHistory());
+}
 
 function setupEvents() {
   $("#smart-search").addEventListener("submit", submitSmartSearch);
@@ -737,6 +853,7 @@ function setupEvents() {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
   event.preventDefault();
   $("#bookmark-search").focus();
+  $("#refresh-history").addEventListener("click", loadRecentHistory);
   return;
 }
 
@@ -801,6 +918,8 @@ function initialize() {
   loadWeather();
   loadBookmarks();
   watchBookmarks();
+  loadRecentHistory();
+  watchHistory();
   
 }
 
