@@ -11,7 +11,7 @@ Extension New Tab cá nhân: dashboard tối, đồng hồ, lịch có note, th�
   - Nhập từ khóa → tìm Google.
   - Nhập `facebook.com`, `fast.com`, IP LAN, `localhost:3000` hoặc URL đầy đủ → mở trực tiếp.
 - **Truy cập nhanh**: thêm/sửa/xóa website qua nút `⚙`; favicon tự lấy theo domain.
-- **Bookmark**: đọc và hiển thị cây bookmark; folder có thể mở/đóng và tự cập nhật khi bookmark thay đổi.
+- **Bookmark**: đọc và hiển thị cây bookmark; folder có thể mở/đóng và tự cập nhật khi bookmark thay đổi, search Bookmarks nhanh.
 - Không dùng localhost, Python server hoặc backend riêng.
 
 ## Cấu trúc thư mục

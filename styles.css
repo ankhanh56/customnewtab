@@ -1127,3 +1127,112 @@ p {
     max-height: 480px;
   }
 }
+
+.bookmark-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 35px;
+  margin: 0 0 9px;
+  padding: 0 8px 0 10px;
+  border: 1px solid #303b48;
+  border-radius: 9px;
+  background: #1a2029;
+  transition: border-color .18s, box-shadow .18s;
+}
+
+.bookmark-search-wrap:focus-within {
+  border-color: #5f9470;
+  box-shadow: 0 0 0 3px rgba(119, 213, 144, .08);
+}
+
+.bookmark-search-icon {
+  color: #8290a1;
+  font-size: 19px;
+  line-height: 1;
+  transform: rotate(-18deg);
+}
+
+.bookmark-search {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #dce5ec;
+  background: transparent;
+  font-size: 11px;
+}
+
+.bookmark-search::placeholder {
+  color: #677484;
+}
+
+.clear-bookmark-search {
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  border-radius: 6px;
+  color: #9eabb8;
+  background: transparent;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.clear-bookmark-search:hover {
+  color: #edf4f8;
+  background: #303946;
+}
+
+.bookmark-search-result {
+  margin: -2px 3px 8px;
+  color: #6f7d8d;
+  font-size: 10px;
+}
+
+.bookmark-folder.search-hidden,
+.bookmark-link.search-hidden {
+  display: none;
+}
+
+.bookmark-folder.search-open > summary {
+  color: #dff6e5;
+  background: rgba(119, 213, 144, .07);
+}
+/* Ẩn scrollbar toàn trang nhưng vẫn cho phép cuộn */
+html,
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ẩn scrollbar riêng của khu vực Bookmark nhưng vẫn cuộn được */
+.bookmark-tree {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.bookmark-tree::-webkit-scrollbar {
+  display: none;
+}
+.note-list,
+.settings-panel,
+.notes-panel {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.note-list::-webkit-scrollbar,
+.settings-panel::-webkit-scrollbar,
+.notes-panel::-webkit-scrollbar {
+  display: none;
+}

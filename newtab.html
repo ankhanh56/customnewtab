@@ -12,7 +12,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@500;600;700&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=1.0.4" />
+  <link rel="stylesheet" href="styles.css?v=1.0.6" />
 </head>
 
 <body>
@@ -103,17 +103,31 @@
 
         <div class="site-grid" id="site-grid"></div>
         <section class="section-heading bookmark-heading">
-          <div>
-            <p class="eyebrow">BOOKMARK</p>
-          </div>
-          <button id="refresh-bookmarks" class="bookmark-refresh" type="button" title="Làm mới bookmark">↻</button>
-        </section>
+  <div><p class="eyebrow">BOOKMARK</p></div>
+  <button id="refresh-bookmarks" class="bookmark-refresh" type="button" title="Làm mới bookmark">↻</button>
+</section>
 
-        <section class="bookmark-card card">
-          <div id="bookmark-tree" class="bookmark-tree">
-            <p class="bookmark-loading">Đang tải bookmark...</p>
-          </div>
-        </section>
+<section class="bookmark-card card">
+  <div class="bookmark-search-wrap">
+    <span class="bookmark-search-icon" aria-hidden="true">⌕</span>
+    <input
+      id="bookmark-search"
+      class="bookmark-search"
+      type="search"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="Tìm bookmark..."
+      aria-label="Tìm bookmark"
+    />
+    <button id="clear-bookmark-search" class="clear-bookmark-search hidden" type="button" aria-label="Xóa tìm kiếm" title="Xóa tìm kiếm">×</button>
+  </div>
+
+  <div id="bookmark-search-result" class="bookmark-search-result hidden"></div>
+
+  <div id="bookmark-tree" class="bookmark-tree">
+    <p class="bookmark-loading">Đang tải bookmark...</p>
+  </div>
+</section>
       </section>
     </section>
   </main>
@@ -189,7 +203,7 @@
   </dialog>
 
   <template id="site-template">
-    <a class="site-card" target="_blank" rel="noreferrer">
+    <a class="site-card" rel="noreferrer">
       <div class="site-top">
         <span class="site-icon"></span>
         <span class="open-arrow">↗</span>
@@ -235,7 +249,7 @@
   </a>
 </template>
 
-  <script src="app.js?v=1.0.4"></script>
+  <script src="app.js?v=1.0.6"></script>
 </body>
 
 </html>

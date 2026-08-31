@@ -88,6 +88,13 @@ function normalizeUrl(value) {
 function getDisplayUrl(value) {
   return value.replace(/^[a-z][a-z\d+.-]*:\/\//i, "").replace(/\/$/, "");
 }
+function normalizeSearchText(value) {
+  return String(value || "")
+    .toLocaleLowerCase("vi-VN")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d");
+}
 function getBookmarkFaviconUrl(url, size = 32) {
   try {
     const hostname = new URL(normalizeUrl(url)).hostname;
@@ -128,6 +135,9 @@ function createBookmarkLink(bookmark) {
   const icon = node.querySelector(".bookmark-link-icon");
 
   link.href = bookmark.url;
+link.dataset.searchText = normalizeSearchText(
+  `${bookmark.title || ""} ${bookmark.url || ""} ${bookmark.parentTitle || ""}`
+);
   link.title = bookmark.title || bookmark.url;
   node.querySelector(".bookmark-link-title").textContent = bookmark.title || bookmark.url;
   node.querySelector(".bookmark-link-url").textContent = getDisplayUrl(bookmark.url);
@@ -136,19 +146,26 @@ function createBookmarkLink(bookmark) {
   return node;
 }
 
-function createBookmarkFolder(folder) {
+function createBookmarkFolder(folder, parentPath = "") {
   const template = $("#bookmark-folder-template");
   const node = template.content.cloneNode(true);
   const details = node.querySelector(".bookmark-folder");
   const children = node.querySelector(".bookmark-children");
   const childNodes = folder.children || [];
+  const folderPath = `${parentPath} ${folder.title || ""}`.trim();
 
   details.dataset.bookmarkId = folder.id;
+  details.dataset.folderText = normalizeSearchText(folderPath);
   node.querySelector(".bookmark-folder-title").textContent = folder.title || "Không tên";
   node.querySelector(".bookmark-folder-count").textContent = `${countBookmarkLinks(childNodes)} link`;
 
   childNodes.forEach((child) => {
-    children.appendChild(child.url ? createBookmarkLink(child) : createBookmarkFolder(child));
+    const childWithParent = { ...child, parentTitle: folderPath };
+    children.appendChild(
+      child.url
+        ? createBookmarkLink(childWithParent)
+        : createBookmarkFolder(childWithParent, folderPath)
+    );
   });
 
   return node;
@@ -186,6 +203,7 @@ function loadBookmarks() {
       $("#bookmark-tree").innerHTML = `<p class="bookmark-empty">Không thể đọc bookmark: ${chrome.runtime.lastError.message}</p>`;
     } else {
       renderBookmarkTree(tree);
+      filterBookmarkTree($("#bookmark-search")?.value || "");
     }
     refreshButton?.classList.remove("is-loading");
   });
@@ -199,6 +217,58 @@ function watchBookmarks() {
   chrome.bookmarks.onMoved.addListener(loadBookmarks);
   chrome.bookmarks.onChildrenReordered.addListener(loadBookmarks);
 }
+function filterBookmarkTree(rawQuery) {
+  const query = normalizeSearchText(rawQuery).trim();
+  const tree = $("#bookmark-tree");
+  const result = $("#bookmark-search-result");
+  const clearButton = $("#clear-bookmark-search");
+
+  clearButton.classList.toggle("hidden", !query);
+
+  if (!query) {
+    tree.querySelectorAll(".bookmark-link, .bookmark-folder").forEach((element) => {
+      element.classList.remove("search-hidden", "search-open");
+    });
+    result.classList.add("hidden");
+    result.textContent = "";
+    return;
+  }
+
+  const links = [...tree.querySelectorAll(".bookmark-link")];
+  let matchedLinks = 0;
+
+  links.forEach((link) => {
+    const matches = link.dataset.searchText?.includes(query);
+    link.classList.toggle("search-hidden", !matches);
+    if (matches) matchedLinks++;
+  });
+
+  const folders = [...tree.querySelectorAll(".bookmark-folder")].reverse();
+  folders.forEach((folder) => {
+    const ownFolderMatches = folder.dataset.folderText?.includes(query);
+    const containsMatchedLink = [...folder.querySelectorAll(":scope .bookmark-link")]
+      .some((link) => !link.classList.contains("search-hidden"));
+    const containsVisibleFolder = [...folder.querySelectorAll(":scope .bookmark-folder")]
+      .some((childFolder) => !childFolder.classList.contains("search-hidden"));
+    const isVisible = ownFolderMatches || containsMatchedLink || containsVisibleFolder;
+
+    folder.classList.toggle("search-hidden", !isVisible);
+    folder.classList.toggle("search-open", isVisible);
+    if (isVisible) folder.open = true;
+  });
+
+  result.textContent = matchedLinks
+    ? `${matchedLinks} bookmark phù hợp`
+    : "Không tìm thấy bookmark phù hợp";
+  result.classList.remove("hidden");
+}
+
+function clearBookmarkSearch() {
+  $("#bookmark-search").value = "";
+  filterBookmarkTree("");
+  $("#bookmark-search").focus();
+}
+
 function getHostname(url) {
   try {
     return new URL(normalizeUrl(url)).hostname;
@@ -663,6 +733,13 @@ async function importNotesFromJson(event) {
 function setupEvents() {
   $("#smart-search").addEventListener("submit", submitSmartSearch);
   document.addEventListener("keydown", (event) => {
+
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+  event.preventDefault();
+  $("#bookmark-search").focus();
+  return;
+}
+
     if (
       event.key === "/" &&
       document.activeElement?.tagName !== "INPUT" &&
@@ -704,6 +781,13 @@ function setupEvents() {
   $("#export-notes").addEventListener("click", exportNotesToJson);
   $("#import-notes").addEventListener("change", importNotesFromJson);
   $("#refresh-bookmarks").addEventListener("click", loadBookmarks);
+
+  $("#bookmark-search").addEventListener("input", (event) => {
+  filterBookmarkTree(event.target.value);
+});
+
+  $("#clear-bookmark-search").addEventListener("click", clearBookmarkSearch);
+
 }
 
 function initialize() {
