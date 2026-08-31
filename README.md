@@ -1,4 +1,4 @@
-# Cục Bột · An Khánh | Brave New Tab
+# Cục Bột · An Khánh | New Tab
 
 Extension New Tab cá nhân: dashboard tối, đồng hồ, lịch có note, thời tiết theo vị trí máy, Google Smart Search, Truy cập nhanh và cây Bookmark.
 
@@ -32,6 +32,8 @@ thien-dat-vu-new-tab/
 
 ```text
 brave://extensions
+chrome://extensions
+
 ```
 
 2. Bật **Developer mode / Chế độ nhà phát triển**.
@@ -149,7 +151,7 @@ Sửa trong `newtab.html`:
 - Không hiện dashboard: kiểm tra extension đang bật và không có New Tab extension khác xung đột.
 - Giao diện cũ: Reload extension, đóng tab cũ rồi mở tab mới.
 - Bookmark trống: kiểm tra quyền `bookmarks` rồi Reload extension.
-- Weather không tải: kiểm tra Internet, quyền vị trí và các `host_permissions` Open-Meteo.
+- Weather không tải: kiểm tra Internet, quyền vị trí và các `host_permissions` Open-Meteo, xem lại quyền cấp phép cho extensions.
 - Favicon không hiện: site có thể không cung cấp favicon; icon fallback sẽ hiển thị.
 
 ## Quyền riêng tư
