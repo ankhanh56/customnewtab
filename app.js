@@ -2,9 +2,6 @@ const DEFAULT_SITES = [
   { name: "Facebook", url: "facebook.com", icon: "f", color: "#1877f2" },
   { name: "YouTube", url: "youtube.com", icon: "▶", color: "#e52222" },
   { name: "Discord", url: "discord.com/app", icon: "◉", color: "#5865f2" },
-  { name: "Gmail", url: "mail.google.com", icon: "M", color: "#e65b4d" },
-  { name: "Google Drive", url: "drive.google.com", icon: "△", color: "#36a852" },
-  { name: "GitHub", url: "github.com", icon: "◆", color: "#596674" }
 ];
 
 const QUOTES = [
@@ -12,42 +9,69 @@ const QUOTES = [
   "Sự nhất quán biến kế hoạch nhỏ thành kết quả lớn.",
   "Đừng chờ cảm hứng. Hãy bắt đầu, rồi cảm hứng sẽ đến.",
   "Hôm nay là một cơ hội mới để xây điều bạn muốn thấy.",
-  "Làm chậm, làm đúng, và làm đến cùng."
+  "Làm chậm, làm đúng, và làm đến cùng.",
 ];
 
 const WEATHER_CODES = {
-  0: ["☀", "Trời quang"], 1: ["🌤", "Chủ yếu quang đãng"], 2: ["⛅", "Có mây rải rác"],
-  3: ["☁", "Nhiều mây"], 45: ["🌫", "Sương mù"], 48: ["🌫", "Sương mù đóng băng"],
-  51: ["🌦", "Mưa phùn nhẹ"], 53: ["🌦", "Mưa phùn"], 55: ["🌧", "Mưa phùn dày"],
-  56: ["🌧", "Mưa phùn băng giá"], 57: ["🌧", "Mưa phùn băng giá mạnh"],
-  61: ["🌦", "Mưa nhẹ"], 63: ["🌧", "Mưa vừa"], 65: ["🌧", "Mưa to"],
-  66: ["🌧", "Mưa băng giá"], 67: ["🌧", "Mưa băng giá mạnh"],
-  71: ["🌨", "Tuyết nhẹ"], 73: ["🌨", "Tuyết vừa"], 75: ["❄", "Tuyết dày"],
-  77: ["❄", "Hạt tuyết"], 80: ["🌦", "Mưa rào nhẹ"], 81: ["🌧", "Mưa rào"],
-  82: ["⛈", "Mưa rào mạnh"], 85: ["🌨", "Mưa tuyết nhẹ"], 86: ["🌨", "Mưa tuyết mạnh"],
-  95: ["⛈", "Dông"], 96: ["⛈", "Dông kèm mưa đá"], 99: ["⛈", "Dông mạnh kèm mưa đá"]
+  0: ["☀", "Trời quang"],
+  1: ["🌤", "Chủ yếu quang đãng"],
+  2: ["⛅", "Có mây rải rác"],
+  3: ["☁", "Nhiều mây"],
+  45: ["🌫", "Sương mù"],
+  48: ["🌫", "Sương mù đóng băng"],
+  51: ["🌦", "Mưa phùn nhẹ"],
+  53: ["🌦", "Mưa phùn"],
+  55: ["🌧", "Mưa phùn dày"],
+  56: ["🌧", "Mưa phùn băng giá"],
+  57: ["🌧", "Mưa phùn băng giá mạnh"],
+  61: ["🌦", "Mưa nhẹ"],
+  63: ["🌧", "Mưa vừa"],
+  65: ["🌧", "Mưa to"],
+  66: ["🌧", "Mưa băng giá"],
+  67: ["🌧", "Mưa băng giá mạnh"],
+  71: ["🌨", "Tuyết nhẹ"],
+  73: ["🌨", "Tuyết vừa"],
+  75: ["❄", "Tuyết dày"],
+  77: ["❄", "Hạt tuyết"],
+  80: ["🌦", "Mưa rào nhẹ"],
+  81: ["🌧", "Mưa rào"],
+  82: ["⛈", "Mưa rào mạnh"],
+  85: ["🌨", "Mưa tuyết nhẹ"],
+  86: ["🌨", "Mưa tuyết mạnh"],
+  95: ["⛈", "Dông"],
+  96: ["⛈", "Dông kèm mưa đá"],
+  99: ["⛈", "Dông mạnh kèm mưa đá"],
 };
 
 const WEATHER_LOCATION = {
   latitude: 11.311,
   longitude: 106.094,
-  label: "Xã Đức Hòa, Tây Ninh"
+  label: "Xã Đức Hòa, Tây Ninh",
 };
 
 const state = {
   calendarDate: new Date(),
   selectedDateKey: "",
-  sites: JSON.parse(localStorage.getItem("tdv-sites") || "null") || DEFAULT_SITES,
-  notes: JSON.parse(localStorage.getItem("tdv-calendar-notes") || "{}")
+  sites:
+    JSON.parse(localStorage.getItem("tdv-sites") || "null") || DEFAULT_SITES,
+  notes: JSON.parse(localStorage.getItem("tdv-calendar-notes") || "{}"),
 };
 
 const $ = (selector) => document.querySelector(selector);
 const pad = (number) => String(number).padStart(2, "0");
 
 function escapeHtml(value) {
-  return String(value).replace(/[&<>'"]/g, (character) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
-  }[character]));
+  return String(value).replace(
+    /[&<>'"]/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;",
+      })[character],
+  );
 }
 
 function normalizeUrl(value) {
@@ -67,14 +91,20 @@ function looksLikeUrl(value) {
   if (/^[a-z][a-z\d+.-]*:\/\//i.test(text)) return true;
   if (/^localhost(?::\d+)?(?:\/.*)?$/i.test(text)) return true;
   if (/^(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?(?:\/.*)?$/.test(text)) return true;
-  return /^(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?\.)+[a-z]{2,}(?::\d+)?(?:\/[^\s]*)?$/i.test(text);
+  return /^(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?\.)+[a-z]{2,}(?::\d+)?(?:\/[^\s]*)?$/i.test(
+    text,
+  );
 }
 
 function submitSmartSearch(event) {
   event.preventDefault();
   const query = $("#search-input").value.trim();
   if (!query) return;
-  window.location.assign(looksLikeUrl(query) ? normalizeUrl(query) : `https://www.google.com/search?q=${encodeURIComponent(query)}`);
+  window.location.assign(
+    looksLikeUrl(query)
+      ? normalizeUrl(query)
+      : `https://www.google.com/search?q=${encodeURIComponent(query)}`,
+  );
 }
 
 function dateKey(year, month, day) {
@@ -83,7 +113,12 @@ function dateKey(year, month, day) {
 
 function formatNoteDate(key) {
   const [year, month, day] = key.split("-").map(Number);
-  return new Intl.DateTimeFormat("vi-VN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+  return new Intl.DateTimeFormat("vi-VN", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
     .format(new Date(year, month - 1, day))
     .replace(/^./, (char) => char.toUpperCase());
 }
@@ -95,10 +130,23 @@ function saveNotes() {
 function updateTime() {
   const now = new Date();
   $("#clock").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  $("#full-date").textContent = new Intl.DateTimeFormat("vi-VN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
-    .format(now).replace(/^./, (char) => char.toUpperCase());
+  $("#full-date").textContent = new Intl.DateTimeFormat("vi-VN", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
+    .format(now)
+    .replace(/^./, (char) => char.toUpperCase());
   const hour = now.getHours();
-  $("#greeting").textContent = hour < 11 ? "CHÀO BUỔI SÁNG" : hour < 14 ? "CHÀO BUỔI TRƯA" : hour < 18 ? "CHÀO BUỔI CHIỀU" : "CHÀO BUỔI TỐI";
+  $("#greeting").textContent =
+    hour < 11
+      ? "CHÀO BUỔI SÁNG"
+      : hour < 14
+        ? "CHÀO BUỔI TRƯA"
+        : hour < 18
+          ? "CHÀO BUỔI CHIỀU"
+          : "CHÀO BUỔI TỐI";
 }
 
 function renderCalendar() {
@@ -110,19 +158,28 @@ function renderCalendar() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const previousMonthDays = new Date(year, month, 0).getDate();
 
-  $("#calendar-title").textContent = new Intl.DateTimeFormat("vi-VN", { month: "long", year: "numeric" })
-    .format(display).replace(/^./, (char) => char.toUpperCase());
+  $("#calendar-title").textContent = new Intl.DateTimeFormat("vi-VN", {
+    month: "long",
+    year: "numeric",
+  })
+    .format(display)
+    .replace(/^./, (char) => char.toUpperCase());
 
   let html = "";
-  for (let index = firstDay - 1; index >= 0; index--) html += `<button type="button" class="muted-day" tabindex="-1">${previousMonthDays - index}</button>`;
+  for (let index = firstDay - 1; index >= 0; index--)
+    html += `<button type="button" class="muted-day" tabindex="-1">${previousMonthDays - index}</button>`;
   for (let day = 1; day <= daysInMonth; day++) {
     const key = dateKey(year, month, day);
-    const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    const isToday =
+      day === today.getDate() &&
+      month === today.getMonth() &&
+      year === today.getFullYear();
     const hasNote = state.notes[key]?.length > 0;
     html += `<button type="button" class="calendar-day${isToday ? " today" : ""}${hasNote ? " has-note" : ""}" data-date="${key}" title="${hasNote ? `${state.notes[key].length} ghi chú` : "Thêm ghi chú"}"><span class="day-number">${day}</span></button>`;
   }
-  const remaining = (7 - (firstDay + daysInMonth) % 7) % 7;
-  for (let day = 1; day <= remaining; day++) html += `<button type="button" class="muted-day" tabindex="-1">${day}</button>`;
+  const remaining = (7 - ((firstDay + daysInMonth) % 7)) % 7;
+  for (let day = 1; day <= remaining; day++)
+    html += `<button type="button" class="muted-day" tabindex="-1">${day}</button>`;
   $("#calendar-days").innerHTML = html;
 
   document.querySelectorAll(".calendar-day").forEach((button) => {
@@ -139,11 +196,15 @@ async function loadWeather() {
     if (!response.ok) throw new Error("Weather request failed");
     const weather = await response.json();
     const current = weather.current;
-    const [icon, description] = WEATHER_CODES[current.weather_code] || ["◌", "Không xác định"];
+    const [icon, description] = WEATHER_CODES[current.weather_code] || [
+      "◌",
+      "Không xác định",
+    ];
     $("#weather-icon").textContent = icon;
     $("#temperature").textContent = Math.round(current.temperature_2m);
     $("#weather-description").textContent = description;
-    $("#apparent-temperature").textContent = `${Math.round(current.apparent_temperature)}°`;
+    $("#apparent-temperature").textContent =
+      `${Math.round(current.apparent_temperature)}°`;
     $("#humidity").textContent = `${current.relative_humidity_2m}%`;
     $("#wind-speed").textContent = `${Math.round(current.wind_speed_10m)} km/h`;
   } catch {
@@ -188,7 +249,9 @@ function addSettingsRow(site = { name: "Trang web mới", url: "" }) {
     <input class="setting-site-url" aria-label="URL trang web" value="${escapeHtml(site.url)}" placeholder="facebook.com hoặc https://..." />
     <button type="button" class="remove-site" title="Xóa trang web">×</button>
   `;
-  row.querySelector(".remove-site").addEventListener("click", () => row.remove());
+  row
+    .querySelector(".remove-site")
+    .addEventListener("click", () => row.remove());
   $("#site-settings").appendChild(row);
 }
 
@@ -199,12 +262,14 @@ function openSettings() {
 
 function saveSettings() {
   const existing = state.sites;
-  state.sites = [...document.querySelectorAll(".site-setting-row")].map((row, index) => ({
-    name: row.querySelector(".setting-site-name").value.trim(),
-    url: row.querySelector(".setting-site-url").value.trim(),
-    icon: existing[index]?.icon || "◆",
-    color: existing[index]?.color || "#41516a"
-  })).filter((site) => site.name && site.url);
+  state.sites = [...document.querySelectorAll(".site-setting-row")]
+    .map((row, index) => ({
+      name: row.querySelector(".setting-site-name").value.trim(),
+      url: row.querySelector(".setting-site-url").value.trim(),
+      icon: existing[index]?.icon || "◆",
+      color: existing[index]?.color || "#41516a",
+    }))
+    .filter((site) => site.name && site.url);
   localStorage.setItem("tdv-sites", JSON.stringify(state.sites));
   renderSites();
 }
@@ -214,7 +279,9 @@ function getNotesForSelectedDate() {
 }
 
 function sortNotes(notes) {
-  return [...notes].sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
+  return [...notes].sort((a, b) =>
+    (a.time || "99:99").localeCompare(b.time || "99:99"),
+  );
 }
 
 function renderNotes() {
@@ -235,8 +302,12 @@ function renderNotes() {
     node.querySelector(".note-time").textContent = note.time || "";
     node.querySelector("h3").textContent = note.title;
     node.querySelector("p").textContent = note.content || "";
-    node.querySelector(".edit-note").addEventListener("click", () => startEditNote(note.id));
-    node.querySelector(".delete-note").addEventListener("click", () => deleteNote(note.id));
+    node
+      .querySelector(".edit-note")
+      .addEventListener("click", () => startEditNote(note.id));
+    node
+      .querySelector(".delete-note")
+      .addEventListener("click", () => deleteNote(note.id));
     container.appendChild(node);
   });
 }
@@ -283,7 +354,12 @@ function submitNote(event) {
     const index = notes.findIndex((note) => note.id === id);
     if (index !== -1) notes[index] = { ...notes[index], title, time, content };
   } else {
-    notes.push({ id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, title, time, content });
+    notes.push({
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      title,
+      time,
+      content,
+    });
   }
   state.notes[state.selectedDateKey] = notes;
   saveNotes();
@@ -296,29 +372,113 @@ function deleteNote(noteId) {
   const notes = getNotesForSelectedDate();
   const note = notes.find((item) => item.id === noteId);
   if (!note || !confirm(`Xóa ghi chú “${note.title}”?`)) return;
-  state.notes[state.selectedDateKey] = notes.filter((item) => item.id !== noteId);
-  if (!state.notes[state.selectedDateKey].length) delete state.notes[state.selectedDateKey];
+  state.notes[state.selectedDateKey] = notes.filter(
+    (item) => item.id !== noteId,
+  );
+  if (!state.notes[state.selectedDateKey].length)
+    delete state.notes[state.selectedDateKey];
   saveNotes();
   clearNoteForm();
   renderNotes();
   renderCalendar();
 }
 
+function exportNotesToJson() {
+  const backup = {
+    app: "Thiên Dật Vũ - 天逸宇 New Tab",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    notes: state.notes,
+  };
+
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  const date = new Date().toISOString().slice(0, 10);
+
+  link.href = url;
+  link.download = `thien-dat-vu-calendar-notes-${date}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(url);
+}
+
+async function importNotesFromJson(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  try {
+    const raw = await file.text();
+    const parsed = JSON.parse(raw);
+
+    const importedNotes = parsed.notes ?? parsed;
+
+    if (
+      !importedNotes ||
+      typeof importedNotes !== "object" ||
+      Array.isArray(importedNotes)
+    ) {
+      throw new Error("Sai cấu trúc dữ liệu note");
+    }
+
+    const shouldReplace = confirm(
+      "Nhập file này sẽ thay thế toàn bộ note hiện tại. Bạn có muốn tiếp tục không?",
+    );
+
+    if (!shouldReplace) return;
+
+    state.notes = importedNotes;
+    saveNotes();
+    renderCalendar();
+
+    if ($("#notes-dialog").open && state.selectedDateKey) {
+      renderNotes();
+    }
+
+    alert("Đã nhập note thành công.");
+  } catch (error) {
+    alert(
+      "Không thể đọc file JSON. Hãy chắc chắn bạn chọn đúng file note đã xuất từ dashboard.",
+    );
+  } finally {
+    event.target.value = "";
+  }
+}
+
 function setupEvents() {
   $("#smart-search").addEventListener("submit", submitSmartSearch);
   document.addEventListener("keydown", (event) => {
-    if (event.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA" && !$("#settings-dialog").open && !$("#notes-dialog").open) {
+    if (
+      event.key === "/" &&
+      document.activeElement?.tagName !== "INPUT" &&
+      document.activeElement?.tagName !== "TEXTAREA" &&
+      !$("#settings-dialog").open &&
+      !$("#notes-dialog").open
+    ) {
       event.preventDefault();
       $("#search-input").focus();
     }
-    if (event.key === "Escape" && $("#notes-dialog").open) $("#notes-dialog").close();
+    if (event.key === "Escape" && $("#notes-dialog").open)
+      $("#notes-dialog").close();
   });
   $("#previous-month").addEventListener("click", () => {
-    state.calendarDate = new Date(state.calendarDate.getFullYear(), state.calendarDate.getMonth() - 1, 1);
+    state.calendarDate = new Date(
+      state.calendarDate.getFullYear(),
+      state.calendarDate.getMonth() - 1,
+      1,
+    );
     renderCalendar();
   });
   $("#next-month").addEventListener("click", () => {
-    state.calendarDate = new Date(state.calendarDate.getFullYear(), state.calendarDate.getMonth() + 1, 1);
+    state.calendarDate = new Date(
+      state.calendarDate.getFullYear(),
+      state.calendarDate.getMonth() + 1,
+      1,
+    );
     renderCalendar();
   });
   $("#settings-button").addEventListener("click", openSettings);
@@ -329,13 +489,17 @@ function setupEvents() {
   $("#close-notes").addEventListener("click", () => $("#notes-dialog").close());
   $("#note-form").addEventListener("submit", submitNote);
   $("#cancel-edit").addEventListener("click", clearNoteForm);
+
+  $("#export-notes").addEventListener("click", exportNotesToJson);
+  $("#import-notes").addEventListener("change", importNotesFromJson);
 }
 
 function initialize() {
   updateTime();
   setInterval(updateTime, 1000);
   renderCalendar();
-  $("#daily-quote").textContent = QUOTES[Math.floor(Date.now() / 86400000) % QUOTES.length];
+  $("#daily-quote").textContent =
+    QUOTES[Math.floor(Date.now() / 86400000) % QUOTES.length];
   renderSites();
   setupEvents();
   loadWeather();

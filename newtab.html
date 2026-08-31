@@ -34,7 +34,8 @@
         <article class="card system-card">
           <p class="eyebrow">BẢNG ĐIỀU KHIỂN CÁ NHÂN</p>
           <div class="profile-row">
-            <div class="avatar">天</div>
+            <div class="avatar"> <img src=".//img/NSHM_PHOTO_2026_7_24_09_03_51.jpg" alt="">
+            </div>
             <div>
               <h1>Thiên Dật Vũ</h1>
               <p>天逸宇 · An Khánh</p>
@@ -122,12 +123,32 @@
   <dialog id="notes-dialog">
     <section class="notes-panel">
       <div class="settings-head notes-head">
-        <div>
-          <p class="eyebrow">GHI CHÚ LỊCH</p>
-          <h2 id="notes-date-title">Ngày</h2>
-        </div>
-        <button id="close-notes" class="close-button" aria-label="Đóng">×</button>
-      </div>
+  <div>
+    <p class="eyebrow">GHI CHÚ LỊCH</p>
+    <h2 id="notes-date-title">Ngày</h2>
+  </div>
+
+  <div class="notes-toolbar">
+    <button
+      id="export-notes"
+      class="toolbar-button"
+      type="button"
+      title="Xuất toàn bộ note thành file JSON"
+    >
+      ⇩ Xuất JSON
+    </button>
+
+    <label
+      class="toolbar-button import-button"
+      title="Nhập ghi chú từ file JSON"
+    >
+      ⇧ Nhập JSON
+      <input id="import-notes" type="file" accept=".json,application/json" hidden />
+    </label>
+
+    <button id="close-notes" class="close-button" aria-label="Đóng">×</button>
+  </div>
+</div>
 
       <div id="note-list" class="note-list"></div>
 
