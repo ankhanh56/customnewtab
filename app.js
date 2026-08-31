@@ -29,8 +29,6 @@ const WEATHER_CODES = {
 };
 
 const WEATHER_LOCATION = {
-  // Tọa độ cố định cho khu vực xã Đức Hòa, Tây Ninh.
-  // Có thể đổi hai số này nếu bạn muốn ghim thời tiết chính xác tại một vị trí khác.
   latitude: 11.311,
   longitude: 106.094,
   label: "Xã Đức Hòa, Tây Ninh"
@@ -38,7 +36,9 @@ const WEATHER_LOCATION = {
 
 const state = {
   calendarDate: new Date(),
-  sites: JSON.parse(localStorage.getItem("tdv-sites") || "null") || DEFAULT_SITES
+  selectedDateKey: "",
+  sites: JSON.parse(localStorage.getItem("tdv-sites") || "null") || DEFAULT_SITES,
+  notes: JSON.parse(localStorage.getItem("tdv-calendar-notes") || "{}")
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -72,25 +72,31 @@ function looksLikeUrl(value) {
 
 function submitSmartSearch(event) {
   event.preventDefault();
-  const input = $("#search-input");
-  const query = input.value.trim();
+  const query = $("#search-input").value.trim();
   if (!query) return;
+  window.location.assign(looksLikeUrl(query) ? normalizeUrl(query) : `https://www.google.com/search?q=${encodeURIComponent(query)}`);
+}
 
-  if (looksLikeUrl(query)) {
-    window.location.assign(normalizeUrl(query));
-    return;
-  }
+function dateKey(year, month, day) {
+  return `${year}-${pad(month + 1)}-${pad(day)}`;
+}
 
-  window.location.assign(`https://www.google.com/search?q=${encodeURIComponent(query)}`);
+function formatNoteDate(key) {
+  const [year, month, day] = key.split("-").map(Number);
+  return new Intl.DateTimeFormat("vi-VN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+    .format(new Date(year, month - 1, day))
+    .replace(/^./, (char) => char.toUpperCase());
+}
+
+function saveNotes() {
+  localStorage.setItem("tdv-calendar-notes", JSON.stringify(state.notes));
 }
 
 function updateTime() {
   const now = new Date();
   $("#clock").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  $("#full-date").textContent = new Intl.DateTimeFormat("vi-VN", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric"
-  }).format(now).replace(/^./, (char) => char.toUpperCase());
-
+  $("#full-date").textContent = new Intl.DateTimeFormat("vi-VN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+    .format(now).replace(/^./, (char) => char.toUpperCase());
   const hour = now.getHours();
   $("#greeting").textContent = hour < 11 ? "CHÀO BUỔI SÁNG" : hour < 14 ? "CHÀO BUỔI TRƯA" : hour < 18 ? "CHÀO BUỔI CHIỀU" : "CHÀO BUỔI TỐI";
 }
@@ -108,14 +114,20 @@ function renderCalendar() {
     .format(display).replace(/^./, (char) => char.toUpperCase());
 
   let html = "";
-  for (let index = firstDay - 1; index >= 0; index--) html += `<span class="muted-day">${previousMonthDays - index}</span>`;
+  for (let index = firstDay - 1; index >= 0; index--) html += `<button type="button" class="muted-day" tabindex="-1">${previousMonthDays - index}</button>`;
   for (let day = 1; day <= daysInMonth; day++) {
+    const key = dateKey(year, month, day);
     const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-    html += `<span class="${isToday ? "today" : ""}">${day}</span>`;
+    const hasNote = state.notes[key]?.length > 0;
+    html += `<button type="button" class="calendar-day${isToday ? " today" : ""}${hasNote ? " has-note" : ""}" data-date="${key}" title="${hasNote ? `${state.notes[key].length} ghi chú` : "Thêm ghi chú"}"><span class="day-number">${day}</span></button>`;
   }
   const remaining = (7 - (firstDay + daysInMonth) % 7) % 7;
-  for (let day = 1; day <= remaining; day++) html += `<span class="muted-day">${day}</span>`;
+  for (let day = 1; day <= remaining; day++) html += `<button type="button" class="muted-day" tabindex="-1">${day}</button>`;
   $("#calendar-days").innerHTML = html;
+
+  document.querySelectorAll(".calendar-day").forEach((button) => {
+    button.addEventListener("click", () => openNotes(button.dataset.date));
+  });
 }
 
 async function loadWeather() {
@@ -128,7 +140,6 @@ async function loadWeather() {
     const weather = await response.json();
     const current = weather.current;
     const [icon, description] = WEATHER_CODES[current.weather_code] || ["◌", "Không xác định"];
-
     $("#weather-icon").textContent = icon;
     $("#temperature").textContent = Math.round(current.temperature_2m);
     $("#weather-description").textContent = description;
@@ -149,23 +160,18 @@ function renderSites() {
   const grid = $("#site-grid");
   const template = $("#site-template");
   grid.innerHTML = "";
-
   state.sites.forEach((site) => {
     const node = template.content.cloneNode(true);
     const card = node.querySelector(".site-card");
     const icon = node.querySelector(".site-icon");
-    const title = node.querySelector("h3");
-    const address = node.querySelector("p");
-
     card.href = normalizeUrl(site.url);
     icon.textContent = site.icon || site.name.slice(0, 1).toUpperCase();
     icon.style.setProperty("--site-color", site.color || "#41516a");
-    title.textContent = site.name;
-    address.textContent = getDisplayUrl(site.url);
+    node.querySelector("h3").textContent = site.name;
+    node.querySelector("p").textContent = getDisplayUrl(site.url);
     grid.appendChild(node);
   });
-
-  $("#site-count").textContent = `${state.sites.length} ${state.sites.length === 1 ? "trang web" : "trang web"}`;
+  $("#site-count").textContent = `${state.sites.length} trang web`;
 }
 
 function renderSettingsSites() {
@@ -193,26 +199,119 @@ function openSettings() {
 
 function saveSettings() {
   const existing = state.sites;
-  state.sites = [...document.querySelectorAll(".site-setting-row")]
-    .map((row, index) => ({
-      name: row.querySelector(".setting-site-name").value.trim(),
-      url: row.querySelector(".setting-site-url").value.trim(),
-      icon: existing[index]?.icon || "◆",
-      color: existing[index]?.color || "#41516a"
-    }))
-    .filter((site) => site.name && site.url);
-
+  state.sites = [...document.querySelectorAll(".site-setting-row")].map((row, index) => ({
+    name: row.querySelector(".setting-site-name").value.trim(),
+    url: row.querySelector(".setting-site-url").value.trim(),
+    icon: existing[index]?.icon || "◆",
+    color: existing[index]?.color || "#41516a"
+  })).filter((site) => site.name && site.url);
   localStorage.setItem("tdv-sites", JSON.stringify(state.sites));
   renderSites();
+}
+
+function getNotesForSelectedDate() {
+  return state.notes[state.selectedDateKey] || [];
+}
+
+function sortNotes(notes) {
+  return [...notes].sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
+}
+
+function renderNotes() {
+  const container = $("#note-list");
+  const notes = sortNotes(getNotesForSelectedDate());
+  container.innerHTML = "";
+
+  if (!notes.length) {
+    container.innerHTML = `<p class="empty-notes">Chưa có ghi chú cho ngày này.<br>Thêm việc cần làm, lịch hẹn hoặc một lời nhắc ở bên dưới.</p>`;
+    return;
+  }
+
+  const template = $("#note-template");
+  notes.forEach((note) => {
+    const node = template.content.cloneNode(true);
+    const item = node.querySelector(".note-item");
+    item.dataset.noteId = note.id;
+    node.querySelector(".note-time").textContent = note.time || "";
+    node.querySelector("h3").textContent = note.title;
+    node.querySelector("p").textContent = note.content || "";
+    node.querySelector(".edit-note").addEventListener("click", () => startEditNote(note.id));
+    node.querySelector(".delete-note").addEventListener("click", () => deleteNote(note.id));
+    container.appendChild(node);
+  });
+}
+
+function clearNoteForm() {
+  $("#note-form").reset();
+  $("#note-id").value = "";
+  $("#note-form-heading").textContent = "Thêm ghi chú";
+  $("#save-note").textContent = "+ Lưu ghi chú";
+  $("#cancel-edit").classList.add("hidden");
+}
+
+function openNotes(key) {
+  state.selectedDateKey = key;
+  $("#notes-date-title").textContent = formatNoteDate(key);
+  clearNoteForm();
+  renderNotes();
+  $("#notes-dialog").showModal();
+}
+
+function startEditNote(noteId) {
+  const note = getNotesForSelectedDate().find((item) => item.id === noteId);
+  if (!note) return;
+  $("#note-id").value = note.id;
+  $("#note-time").value = note.time || "";
+  $("#note-title").value = note.title;
+  $("#note-content").value = note.content || "";
+  $("#note-form-heading").textContent = "Sửa ghi chú";
+  $("#save-note").textContent = "Lưu thay đổi";
+  $("#cancel-edit").classList.remove("hidden");
+  $("#note-title").focus();
+}
+
+function submitNote(event) {
+  event.preventDefault();
+  const id = $("#note-id").value;
+  const title = $("#note-title").value.trim();
+  const time = $("#note-time").value;
+  const content = $("#note-content").value.trim();
+  if (!title || !state.selectedDateKey) return;
+
+  const notes = getNotesForSelectedDate();
+  if (id) {
+    const index = notes.findIndex((note) => note.id === id);
+    if (index !== -1) notes[index] = { ...notes[index], title, time, content };
+  } else {
+    notes.push({ id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, title, time, content });
+  }
+  state.notes[state.selectedDateKey] = notes;
+  saveNotes();
+  clearNoteForm();
+  renderNotes();
+  renderCalendar();
+}
+
+function deleteNote(noteId) {
+  const notes = getNotesForSelectedDate();
+  const note = notes.find((item) => item.id === noteId);
+  if (!note || !confirm(`Xóa ghi chú “${note.title}”?`)) return;
+  state.notes[state.selectedDateKey] = notes.filter((item) => item.id !== noteId);
+  if (!state.notes[state.selectedDateKey].length) delete state.notes[state.selectedDateKey];
+  saveNotes();
+  clearNoteForm();
+  renderNotes();
+  renderCalendar();
 }
 
 function setupEvents() {
   $("#smart-search").addEventListener("submit", submitSmartSearch);
   document.addEventListener("keydown", (event) => {
-    if (event.key === "/" && document.activeElement?.tagName !== "INPUT" && !$("#settings-dialog").open) {
+    if (event.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA" && !$("#settings-dialog").open && !$("#notes-dialog").open) {
       event.preventDefault();
       $("#search-input").focus();
     }
+    if (event.key === "Escape" && $("#notes-dialog").open) $("#notes-dialog").close();
   });
   $("#previous-month").addEventListener("click", () => {
     state.calendarDate = new Date(state.calendarDate.getFullYear(), state.calendarDate.getMonth() - 1, 1);
@@ -227,6 +326,9 @@ function setupEvents() {
   $("#settings-form").addEventListener("submit", (event) => {
     if (event.submitter?.value === "save") saveSettings();
   });
+  $("#close-notes").addEventListener("click", () => $("#notes-dialog").close());
+  $("#note-form").addEventListener("submit", submitNote);
+  $("#cancel-edit").addEventListener("click", clearNoteForm);
 }
 
 function initialize() {
