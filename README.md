@@ -324,11 +324,4 @@ Nhấn phím `/` ở bất cứ đâu trên dashboard để đưa con trỏ vào
 
 ## Phát triển tiếp
 
-Một số hướng nâng cấp phù hợp nếu muốn mở rộng sau này:
-
-- Kéo thả để đổi vị trí các ô truy cập nhanh.
-- Đặt favicon thật cho từng website.
-- Đồng bộ danh sách website qua file JSON hoặc GitHub Gist riêng.
-- Tạo nhóm: Mạng xã hội, Công việc, Server, Streaming và Dev.
-- Thêm chỉ số từ Home Assistant/Proxmox/Docker qua API hoặc endpoint status nội bộ.
-- Thêm phím tắt cho từng site và chuyển đổi chủ đề màu.
+....
