@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Thiên Dật Vũ - 天逸宇 | New Tab",
-  "description": "Trang tab mới: Google Smart Search, thời tiết Tây Ninh, lịch và truy cập nhanh.",
-  "version": "1.0.4",
+  "name": "Cục Bột · An Khánh | New Tab",
+  "description": "Trang tab mới: Google Smart Search, thời tiết Tây Ninh, lịch và truy cập nhanh, bookmarks.",
+  "version": "1.0.5",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
@@ -11,6 +11,7 @@
   ],
   "host_permissions": [
     "https://api.open-meteo.com/*",
+    "https://geocoding-api.open-meteo.com/*",
     "https://www.google.com/*"
   ]
 }

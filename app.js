@@ -47,10 +47,10 @@ const WEATHER_CODES = {
   99: ["⛈", "Dông mạnh kèm mưa đá"],
 };
 
-const WEATHER_LOCATION = {
-  latitude: 11.311,
-  longitude: 106.094,
-  label: "Tây Ninh",
+const WEATHER_FALLBACK_LOCATION = {
+  latitude: 10.789359,
+  longitude: 106.652784,
+  label: "TP. Hồ Chí Minh",
 };
 
 const state = {
@@ -341,33 +341,88 @@ function renderCalendar() {
   });
 }
 
-async function loadWeather() {
-  $("#weather-place").textContent = WEATHER_LOCATION.label;
+function getDeviceLocation() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error("Trình duyệt không hỗ trợ định vị"));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy
+        });
+      },
+      reject,
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 15 * 60 * 1000
+      }
+    );
+  });
+}
+
+async function getLocationLabel(latitude, longitude) {
   try {
-    const { latitude, longitude } = WEATHER_LOCATION;
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=Asia%2FBangkok`;
+    const url = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${latitude}&longitude=${longitude}&language=vi&format=json`;
     const response = await fetch(url);
-    if (!response.ok) throw new Error("Weather request failed");
-    const weather = await response.json();
-    const current = weather.current;
-    const [icon, description] = WEATHER_CODES[current.weather_code] || [
-      "◌",
-      "Không xác định",
-    ];
-    $("#weather-icon").textContent = icon;
-    $("#temperature").textContent = Math.round(current.temperature_2m);
-    $("#weather-description").textContent = description;
-    $("#apparent-temperature").textContent =
-      `${Math.round(current.apparent_temperature)}°`;
-    $("#humidity").textContent = `${current.relative_humidity_2m}%`;
-    $("#wind-speed").textContent = `${Math.round(current.wind_speed_10m)} km/h`;
+    if (!response.ok) throw new Error("Reverse geocoding failed");
+
+    const data = await response.json();
+    const place = data.results?.[0];
+    if (!place) return "Vị trí hiện tại";
+
+    return place.admin1 || place.name || "Vị trí hiện tại";
   } catch {
-    $("#weather-icon").textContent = "◌";
-    $("#temperature").textContent = "--";
-    $("#weather-description").textContent = "Không tải được thời tiết";
-    $("#apparent-temperature").textContent = "--";
-    $("#humidity").textContent = "--";
-    $("#wind-speed").textContent = "--";
+    return "Vị trí hiện tại";
+  }
+}
+
+async function fetchWeather(latitude, longitude, label) {
+  $("#weather-place").textContent = label;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("Weather request failed");
+
+  const weather = await response.json();
+  const current = weather.current;
+  const [icon, description] = WEATHER_CODES[current.weather_code] || ["◌", "Không xác định"];
+
+  $("#weather-icon").textContent = icon;
+  $("#temperature").textContent = Math.round(current.temperature_2m);
+  $("#weather-description").textContent = description;
+  $("#apparent-temperature").textContent = `${Math.round(current.apparent_temperature)}°`;
+  $("#humidity").textContent = `${current.relative_humidity_2m}%`;
+  $("#wind-speed").textContent = `${Math.round(current.wind_speed_10m)} km/h`;
+}
+
+async function loadWeather() {
+  $("#weather-place").textContent = "Đang xác định vị trí...";
+  $("#weather-description").textContent = "Đang tải thời tiết...";
+
+  try {
+    const location = await getDeviceLocation();
+    const label = await getLocationLabel(location.latitude, location.longitude);
+    await fetchWeather(location.latitude, location.longitude, label);
+  } catch (locationError) {
+    try {
+      await fetchWeather(
+        WEATHER_FALLBACK_LOCATION.latitude,
+        WEATHER_FALLBACK_LOCATION.longitude,
+        WEATHER_FALLBACK_LOCATION.label
+      );
+    } catch {
+      $("#weather-icon").textContent = "◌";
+      $("#temperature").textContent = "--";
+      $("#weather-description").textContent = "Không tải được thời tiết";
+      $("#apparent-temperature").textContent = "--";
+      $("#humidity").textContent = "--";
+      $("#wind-speed").textContent = "--";
+    }
   }
 }
 

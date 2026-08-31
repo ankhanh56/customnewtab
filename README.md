@@ -1,30 +1,24 @@
-# Thiên Dật Vũ — 天逸宇 | Brave New Tab Dashboard
+# Cục Bột · An Khánh | Brave New Tab
 
-Một extension **New Tab** dành cho Brave/Chrome theo phong cách dashboard tối giản. Trang tab mới có đồng hồ, lịch, thời tiết cố định, Google Smart Search và các ô truy cập nhanh có thể tự thêm hoặc chỉnh sửa.
-
-> Phiên bản hiện tại: `1.1.0`
+Extension New Tab cá nhân: dashboard tối, đồng hồ, lịch có note, thời tiết theo vị trí máy, Google Smart Search, Truy cập nhanh và cây Bookmark.
 
 ## Tính năng
 
-- Ghi đè trang tab mới của Brave/Chrome bằng giao diện dashboard cá nhân.
-- Tên hiển thị mặc định: **Thiên Dật Vũ — 天逸宇**.
-- Đồng hồ thời gian thực, lời chào theo buổi và lịch tháng tiếng Việt.
-- Thời tiết thời gian thực từ Open-Meteo, không cần API key.
-- Địa điểm thời tiết được ghim cố định trong mã nguồn.
-- **Google Smart Search**:
-  - Nhập cụm từ bình thường để tìm trên Google.
-  - Nhập tên miền, URL, IP LAN hoặc `localhost` để truy cập thẳng trang web.
-- Truy cập nhanh mặc định: Facebook, YouTube, Discord, Gmail, Google Drive và GitHub.
-- Có thể thêm, sửa tên, sửa URL hoặc xóa các ô truy cập nhanh trong giao diện cài đặt `⚙`.
-- Lưu danh sách truy cập nhanh bằng `localStorage`, nên các thay đổi vẫn còn sau khi mở tab mới hoặc khởi động lại Brave.
-- Không dùng ảnh, video webcam, backend hay tài khoản API.
+- Đồng hồ, ngày tháng, lời chào và lịch tiếng Việt.
+- Ghi chú theo ngày: thêm, sửa, xóa; ngày có note hiện chấm xanh.
+- Thời tiết theo **vị trí hiện tại của máy**; nếu không cấp quyền vị trí sẽ dùng TP.Hồ Chí Minh làm vị trí dự phòng.
+- Google Smart Search:
+  - Nhập từ khóa → tìm Google.
+  - Nhập `facebook.com`, `fast.com`, IP LAN, `localhost:3000` hoặc URL đầy đủ → mở trực tiếp.
+- **Truy cập nhanh**: thêm/sửa/xóa website qua nút `⚙`; favicon tự lấy theo domain.
+- **Bookmark**: đọc và hiển thị cây bookmark; folder có thể mở/đóng và tự cập nhật khi bookmark thay đổi.
+- Không dùng localhost, Python server hoặc backend riêng.
 
 ## Cấu trúc thư mục
 
-Tạo một thư mục, ví dụ `thien-dat-vu-new-tab`, với đúng cấu trúc sau:
-
 ```text
 thien-dat-vu-new-tab/
+├── img/                  # Nếu project đang dùng ảnh/icon/avatar riêng
 ├── manifest.json
 ├── newtab.html
 ├── styles.css
@@ -32,296 +26,136 @@ thien-dat-vu-new-tab/
 └── README.md
 ```
 
-| File | Mục đích |
-|---|---|
-| `manifest.json` | Khai báo extension và cho Brave dùng `newtab.html` thay trang tab mới mặc định. |
-| `newtab.html` | Cấu trúc giao diện dashboard. |
-| `styles.css` | Màu sắc, bố cục, responsive và hiệu ứng giao diện. |
-| `app.js` | Đồng hồ, lịch, thời tiết, Smart Search và lưu truy cập nhanh. |
-| `README.md` | Hướng dẫn cài đặt, cập nhật và tùy chỉnh. |
+## Cài đặt
 
-## Cài đặt lần đầu
-
-### 1. Chuẩn bị file extension
-
-1. Tạo thư mục `thien-dat-vu-new-tab` tại một nơi **không bị xóa hoặc di chuyển**, ví dụ `D:\Extensions\thien-dat-vu-new-tab`.
-2. Tạo bốn file: `manifest.json`, `newtab.html`, `styles.css` và `app.js`.
-3. Dán mã nguồn tương ứng vào từng file.
-4. Lưu file với mã hóa UTF-8.
-
-> Không chọn thư mục trong Downloads nếu bạn thường dọn Downloads. Brave sẽ mất đường dẫn extension nếu thư mục bị di chuyển, đổi tên hoặc xóa.
-
-### 2. Bật Developer mode
-
-1. Mở Brave.
-2. Nhập địa chỉ sau vào thanh địa chỉ, sau đó nhấn Enter:
+1. Mở Brave và truy cập:
 
 ```text
 brave://extensions
 ```
 
-3. Bật công tắc **Developer mode / Chế độ nhà phát triển** ở góc trên bên phải.
+2. Bật **Developer mode / Chế độ nhà phát triển**.
+3. Nhấn **Load unpacked / Tải tiện ích đã giải nén**.
+4. Chọn thư mục chứa file `manifest.json`.
+5. Mở tab mới bằng `Ctrl + T`.
+6. Khi Brave yêu cầu quyền vị trí, chọn **Allow / Cho phép** để thời tiết dùng vị trí máy.
 
-### 3. Load extension
+> Chỉ nên bật một extension ghi đè New Tab để tránh xung đột giao diện.
 
-1. Nhấn **Load unpacked / Tải tiện ích đã giải nén**.
-2. Chọn thư mục `thien-dat-vu-new-tab` — chọn thư mục chứa các file, không chọn riêng lẻ một file.
-3. Extension **Thiên Dật Vũ - 天逸宇 | New Tab** sẽ xuất hiện trong danh sách extension.
-4. Mở một tab mới bằng `Ctrl + T` để kiểm tra dashboard.
+## Cập nhật
 
-Nếu trang tab mới vẫn là giao diện mặc định, thử đóng toàn bộ tab mới cũ rồi mở một tab mới sau khi extension đã được tải.
+1. Lưu các file đã chỉnh trong thư mục extension.
+2. Mở `brave://extensions`.
+3. Nhấn **Reload / Tải lại** trên extension.
+4. Đóng tab dashboard cũ rồi mở tab mới bằng `Ctrl + T`.
 
-## Cập nhật dashboard
+Nếu vừa đổi `manifest.json`, Reload extension là bắt buộc.
 
-Khi bạn chỉnh mã hoặc nhận bản cập nhật mới, không cần xóa extension và cài lại.
+## Thời tiết vị trí máy
 
-1. Mở thư mục extension hiện tại.
-2. Thay nội dung file cần cập nhật, thường là `newtab.html`, `styles.css` hoặc `app.js`.
-3. Nếu cập nhật có thay đổi `manifest.json`, thay file đó luôn.
-4. Lưu tất cả file.
-5. Mở `brave://extensions`.
-6. Tìm extension **Thiên Dật Vũ - 天逸宇 | New Tab**.
-7. Nhấn nút **Reload / Tải lại** (biểu tượng làm mới) trên thẻ extension.
-8. Đóng các tab dashboard đang mở, rồi nhấn `Ctrl + T` để mở dashboard mới.
+Dashboard dùng Geolocation API của Brave để lấy tọa độ hiện tại, sau đó lấy thời tiết từ Open-Meteo.
 
-### Nếu bản cũ vẫn hiện
-
-Trình duyệt đôi khi giữ giao diện cũ trong cache. Làm theo thứ tự này:
-
-1. Nhấn `Ctrl + Shift + R` trên tab dashboard để tải cứng lại.
-2. Nếu chưa được, vào `brave://extensions` và nhấn **Reload** thêm một lần.
-3. Đóng tab đó, mở tab mới lại.
-4. Kiểm tra bạn đã sửa đúng file trong đúng thư mục mà Brave đang load hay chưa. Trên thẻ extension, nhấn **Details / Chi tiết** để xem đường dẫn extension nếu cần.
-
-## Tùy chỉnh tên hiển thị
-
-Tên **Thiên Dật Vũ — 天逸宇** hiện xuất hiện ở nhiều vị trí. Để đổi đồng bộ, mở `newtab.html` rồi tìm và thay các đoạn sau:
-
-```html
-<title>Thiên Dật Vũ — 天逸宇</title>
-```
-
-```html
-<span>Thiên Dật Vũ <b>— 天逸宇</b></span>
-```
-
-```html
-<h1>Thiên Dật Vũ</h1>
-<p>逸宇 · Digital workspace</p>
-```
-
-Ví dụ, nếu muốn đổi thành **An Khánh — 安庆**, bạn có thể thay thành:
-
-```html
-<title>An Khánh — 安庆</title>
-```
-
-```html
-<span>An Khánh <b>— 安庆</b></span>
-```
-
-```html
-<h1>An Khánh</h1>
-<p>安庆 · Digital workspace</p>
-```
-
-Ngoài ra, nếu muốn đổi cả tên extension hiển thị tại `brave://extensions`, sửa trường `name` trong `manifest.json`:
-
-```json
-{
-  "name": "An Khánh - 安庆 | New Tab"
-}
-```
-
-Sau khi sửa, vào `brave://extensions` và nhấn **Reload**.
-
-## Chỉnh vị trí thời tiết
-
-Thời tiết được đặt cố định trong file `app.js`. Tìm khối sau:
+Trong `app.js`, cấu hình dự phòng có dạng:
 
 ```javascript
-const WEATHER_LOCATION = {
-  latitude: 11.311,
-  longitude: 106.094,
-  label: "Xã Đức Hòa, Tây Ninh"
+const WEATHER_FALLBACK_LOCATION = {
+  latitude: 10.789359,
+  longitude: 106.652784,
+  label: "TP. Hồ Chí Minh",
 };
 ```
 
-Ý nghĩa từng giá trị:
-
-| Thuộc tính | Ý nghĩa |
+| Tình huống | Kết quả |
 |---|---|
-| `latitude` | Vĩ độ của vị trí, ví dụ `11.311`. |
-| `longitude` | Kinh độ của vị trí, ví dụ `106.094`. |
-| `label` | Tên địa điểm hiển thị trên dashboard. |
+| Cho phép vị trí | Hiển thị thời tiết theo vị trí thiết bị. |
+| Chặn/từ chối vị trí | Dùng thời tiết TP.Hồ Chí Minh dự phòng. |
+| Không có Internet | Không tải được dữ liệu thời tiết. |
 
-### Ví dụ thay địa điểm
+Nếu đã lỡ chặn quyền vị trí, mở dashboard → bấm biểu tượng điều khiển trang ở cạnh trái thanh địa chỉ → tìm **Location / Vị trí** → đổi sang **Allow / Cho phép** → tải lại tab.
 
-Nếu muốn hiển thị tên khác nhưng giữ tọa độ hiện tại:
-
-```javascript
-const WEATHER_LOCATION = {
-  latitude: 11.311,
-  longitude: 106.094,
-  label: "Đức Hòa, Tây Ninh"
-};
-```
-
-Nếu muốn ghim sang một khu vực khác, thay cả ba giá trị:
-
-```javascript
-const WEATHER_LOCATION = {
-  latitude: 10.7769,
-  longitude: 106.7009,
-  label: "Quận 1, Thành phố Hồ Chí Minh"
-};
-```
-
-### Cách lấy tọa độ chính xác
-
-1. Mở Google Maps và tìm địa điểm bạn muốn.
-2. Nhấp chuột phải đúng vị trí trên bản đồ.
-3. Sao chép cặp số tọa độ xuất hiện ở đầu menu, theo dạng `vĩ_độ, kinh_độ`.
-4. Dán số thứ nhất vào `latitude`; dán số thứ hai vào `longitude`.
-5. Đổi `label` thành tên bạn muốn nhìn thấy trên dashboard.
-6. Lưu `app.js`, vào `brave://extensions`, nhấn **Reload**, sau đó mở tab mới.
-
-> Chỉ `label` thay đổi thì giao diện chỉ đổi tên. Muốn dữ liệu nhiệt độ/mưa/gió thực sự của địa điểm mới, phải đổi cả `latitude` lẫn `longitude`.
-
-## Thêm và quản lý truy cập nhanh
-
-### Thêm trực tiếp trên dashboard
-
-1. Mở tab mới.
-2. Nhấn biểu tượng **⚙** ở góc trên bên phải.
-3. Chọn **+ Thêm trang web**.
-4. Điền tên và URL.
-5. Nhấn **Lưu thay đổi**.
-
-URL có thể nhập dưới các dạng sau:
-
-| Bạn nhập | Dashboard sẽ mở |
-|---|---|
-| `facebook.com` | `https://facebook.com` |
-| `fast.com` | `https://fast.com` |
-| `https://www.youtube.com/` | Giữ nguyên URL HTTPS |
-| `192.168.1.1` | `https://192.168.1.1` |
-| `localhost:3000` | `https://localhost:3000` |
-
-> Với router, Home Assistant, hoặc dịch vụ LAN chỉ chạy HTTP, hãy nhập đầy đủ giao thức. Ví dụ: `http://192.168.1.1`, `http://homeassistant.local:8123`, hoặc `http://localhost:3000`. Nếu không, dashboard sẽ tự thêm `https://`.
-
-### Chỉnh danh sách mặc định trong code
-
-Các website xuất hiện lần đầu nằm ở đầu file `app.js`:
-
-```javascript
-const DEFAULT_SITES = [
-  { name: "Facebook", url: "facebook.com", icon: "f", color: "#1877f2" },
-  { name: "YouTube", url: "youtube.com", icon: "▶", color: "#e52222" },
-  { name: "Discord", url: "discord.com/app", icon: "◉", color: "#5865f2" }
-];
-```
-
-Mỗi trang có bốn phần:
-
-- `name`: Tên hiển thị trên thẻ.
-- `url`: Địa chỉ trang web.
-- `icon`: Ký tự hoặc emoji trong ô biểu tượng.
-- `color`: Mã màu nền biểu tượng dạng hex.
-
-Ví dụ thêm Fast.com:
-
-```javascript
-{ name: "Fast", url: "fast.com", icon: "⚡", color: "#ef4444" }
-```
-
-### Lưu ý về dữ liệu cũ
-
-Danh sách bạn chỉnh bằng biểu tượng `⚙` được lưu trong `localStorage`. Vì vậy, nếu bạn sửa `DEFAULT_SITES` trong `app.js` nhưng dashboard vẫn hiện danh sách cũ, đó là hành vi bình thường: dữ liệu cá nhân đã lưu sẽ được ưu tiên.
-
-Để quay về danh sách mặc định mới trong code:
-
-1. Mở dashboard.
-2. Nhấn `F12` để mở DevTools.
-3. Vào tab **Console**.
-4. Dán lệnh sau rồi nhấn Enter:
-
-```javascript
-localStorage.removeItem("tdv-sites");
-location.reload();
-```
-
-Hoặc xóa dữ liệu trang của extension trong phần cài đặt quyền riêng tư của Brave.
-
-## Google Smart Search
-
-Ô tìm kiếm ở đầu trang tự chọn giữa tìm Google và truy cập trực tiếp.
-
-| Nội dung nhập | Hành động |
-|---|---|
-| `cách cấu hình Tailscale` | Mở tìm kiếm Google. |
-| `fast.com` | Mở trực tiếp Fast.com. |
-| `facebook.com` | Mở trực tiếp Facebook. |
-| `discord.com/app` | Mở trực tiếp Discord. |
-| `youtube.com/@tenkenh` | Mở trực tiếp đường dẫn YouTube. |
-| `192.168.1.1` | Mở trực tiếp trang router. |
-| `localhost:3000` | Mở server local. |
-| `http://192.168.1.1` | Mở chính xác URL HTTP được nhập. |
-| `https://github.com/...` | Mở nguyên URL được nhập. |
-
-Nhấn phím `/` ở bất cứ đâu trên dashboard để đưa con trỏ vào ô Smart Search.
-
-## Khắc phục lỗi
-
-### Extension báo lỗi khi Load unpacked
-
-- Kiểm tra file tên đúng là `manifest.json`, không phải `manifest.json.txt`.
-- Kiểm tra cấu trúc thư mục: cả bốn file phải nằm trực tiếp trong thư mục bạn chọn.
-- Mở `manifest.json` bằng VS Code và đảm bảo JSON không có dấu phẩy thừa.
-- Trong `brave://extensions`, bấm nút **Errors** trên extension để đọc dòng lỗi cụ thể.
-
-### Không mở được một website nội bộ
-
-- Thử mở URL trực tiếp trong Brave trước để xác nhận URL đang hoạt động.
-- Nếu dịch vụ chỉ dùng HTTP, nhập `http://` rõ ràng thay vì chỉ nhập IP/tên miền.
-- Kiểm tra máy tính có đang kết nối mạng LAN, Tailscale hoặc VPN cần thiết không.
-- Nếu dùng chứng chỉ HTTPS tự ký, mở URL một lần trong Brave và chấp nhận cảnh báo chứng chỉ nếu bạn hiểu và tin cậy dịch vụ nội bộ đó.
-
-### Không tải được thời tiết
-
-- Kiểm tra kết nối Internet.
-- Vào `brave://extensions`, nhấn Reload extension.
-- Mở DevTools bằng `F12`, xem tab Console để biết lỗi mạng nếu có.
-- Kiểm tra `manifest.json` vẫn có quyền sau:
+`manifest.json` phải có các quyền host sau:
 
 ```json
 "host_permissions": [
-  "https://api.open-meteo.com/*"
+  "https://api.open-meteo.com/*",
+  "https://geocoding-api.open-meteo.com/*",
+  "https://www.google.com/*"
 ]
 ```
 
-### Các thay đổi truy cập nhanh bị mất
+## Truy cập nhanh
 
-- Không dùng chế độ Private/Incognito, vì dữ liệu có thể bị xóa khi đóng cửa sổ.
-- Không xóa dữ liệu trang của extension hoặc dữ liệu Brave nếu muốn giữ danh sách.
-- Không đổi ID extension bằng cách chuyển sang một thư mục/project khác nếu bạn muốn giữ `localStorage` cũ.
+Bấm `⚙` để thêm, sửa hoặc xóa website. Chỉ cần nhập tên và URL, ví dụ:
 
-## Gỡ cài đặt
+| Nhập URL | Mở thành |
+|---|---|
+| `facebook.com` | `https://facebook.com` |
+| `fast.com` | `https://fast.com` |
+| `https://youtube.com` | Giữ nguyên HTTPS |
+| `http://192.168.1.1` | Mở router/LAN qua HTTP |
 
-1. Mở `brave://extensions`.
-2. Tìm **Thiên Dật Vũ - 天逸宇 | New Tab**.
-3. Nhấn **Remove / Xóa**.
-4. Brave sẽ tự khôi phục trang tab mới mặc định.
+Icon website tự lấy từ domain. Nếu favicon không tải được, dashboard hiển thị chữ cái đầu của tên site.
 
-> Gỡ extension sẽ xóa dữ liệu cài đặt/truy cập nhanh gắn với extension đó. Nếu muốn dùng lại sau này, nên sao chép danh sách site hoặc lưu cả thư mục project ở nơi an toàn.
+Danh sách được lưu cục bộ trong Brave với khóa:
+
+```text
+tdv-sites
+```
+
+## Bookmark
+
+Mục **BOOKMARK** đọc trực tiếp bookmark hiện có trong Brave.
+
+- Hiển thị folder dạng cây; bấm folder để đóng/mở.
+- Tự cập nhật khi bạn thêm, xóa, đổi tên, di chuyển hoặc sắp xếp bookmark.
+- Bấm `↻` để làm mới thủ công.
+- Brave Sync chịu trách nhiệm đồng bộ bookmark giữa các thiết bị; dashboard chỉ đọc bookmark trên máy hiện tại.
+
+`manifest.json` phải có:
+
+```json
+"permissions": ["bookmarks"]
+```
+
+## Ghi chú lịch
+
+1. Bấm vào một ngày trên lịch.
+2. Nhập thời gian, tiêu đề và nội dung.
+3. Bấm **Lưu ghi chú**.
+4. Bấm lại vào ngày đó để xem, sửa hoặc xóa note.
+
+Note được lưu cục bộ trong hồ sơ Brave với khóa:
+
+```text
+tdv-calendar-notes
+```
+
+Không xóa dữ liệu extension hoặc gỡ extension nếu muốn giữ note. Nếu bản của bạn có nút Xuất/Nhập JSON, hãy xuất file định kỳ để backup note.
+
+## Đổi tên
+
+Sửa trong `newtab.html`:
+
+```html
+<title>Cục Bột · An Khánh</title>
+<span>Thiên Dật Vũ <b>— 天逸宇</b></span>
+<h1>Thiên Dật Vũ</h1>
+```
+
+Để đổi tên extension ở `brave://extensions`, sửa trường `name` trong `manifest.json`, rồi Reload extension.
+
+## Khắc phục lỗi
+
+- Không hiện dashboard: kiểm tra extension đang bật và không có New Tab extension khác xung đột.
+- Giao diện cũ: Reload extension, đóng tab cũ rồi mở tab mới.
+- Bookmark trống: kiểm tra quyền `bookmarks` rồi Reload extension.
+- Weather không tải: kiểm tra Internet, quyền vị trí và các `host_permissions` Open-Meteo.
+- Favicon không hiện: site có thể không cung cấp favicon; icon fallback sẽ hiển thị.
 
 ## Quyền riêng tư
 
-- Extension không gửi danh sách website của bạn đến máy chủ riêng.
-- Thời tiết gọi trực tiếp Open-Meteo qua HTTPS.
-- Tìm kiếm được mở qua Google khi bạn nhập nội dung không phải URL.
-- Danh sách truy cập nhanh được lưu cục bộ trong hồ sơ Brave thông qua `localStorage`.
-
-## Phát triển tiếp
-
-....
+- Vị trí chỉ được lấy khi dashboard mở để tải thời tiết; không theo dõi nền và không lưu lịch sử vị trí.
+- Bookmark đọc qua API nội bộ của Brave.
+- Note và Truy cập nhanh lưu trong profile Brave hiện tại.
+- Thời tiết gọi Open-Meteo; favicon gọi dịch vụ favicon Google theo hostname website.
+- Không có server riêng, localhost hoặc ứng dụng chạy nền.
