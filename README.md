@@ -146,6 +146,24 @@ Sửa trong `newtab.html`:
 
 Để đổi tên extension ở `brave://extensions`, sửa trường `name` trong `manifest.json`, rồi Reload extension.
 
+## Tùy chỉnh thời hạn cache vị trí thời tiết
+
+Muốn thay 7 ngày thành thời hạn khác, sửa dòng:
+
+```javascript
+const WEATHER_LOCATION_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+```
+
+Ví dụ:
+
+```javascript
+// 1 ngày
+const WEATHER_LOCATION_CACHE_TTL = 24 * 60 * 60 * 1000;
+
+// 30 ngày
+const WEATHER_LOCATION_CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
+```
+
 ## Khắc phục lỗi
 
 - Không hiện dashboard: kiểm tra extension đang bật và không có New Tab extension khác xung đột.

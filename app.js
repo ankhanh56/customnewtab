@@ -47,11 +47,14 @@ const WEATHER_CODES = {
   99: ["⛈", "Dông mạnh kèm mưa đá"],
 };
 
+
 const WEATHER_FALLBACK_LOCATION = {
   latitude: 10.789359,
   longitude: 106.652784,
   label: "TP. Hồ Chí Minh",
 };
+const WEATHER_LOCATION_CACHE_KEY = "tdv-weather-location";
+const WEATHER_LOCATION_CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
 
 const state = {
   calendarDate: new Date(),
@@ -410,7 +413,41 @@ function renderCalendar() {
     button.addEventListener("click", () => openNotes(button.dataset.date));
   });
 }
+function getCachedWeatherLocation() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(WEATHER_LOCATION_CACHE_KEY));
 
+    if (
+      !cached ||
+      !Number.isFinite(cached.latitude) ||
+      !Number.isFinite(cached.longitude) ||
+      !Number.isFinite(cached.savedAt)
+    ) {
+      return null;
+    }
+
+    const isExpired = Date.now() - cached.savedAt > WEATHER_LOCATION_CACHE_TTL;
+    return isExpired ? null : cached;
+  } catch {
+    return null;
+  }
+}
+
+function cacheWeatherLocation(location) {
+  const payload = {
+    latitude: location.latitude,
+    longitude: location.longitude,
+    label: location.label || "Vị trí hiện tại",
+    savedAt: Date.now()
+  };
+
+  localStorage.setItem(WEATHER_LOCATION_CACHE_KEY, JSON.stringify(payload));
+  return payload;
+}
+
+function clearCachedWeatherLocation() {
+  localStorage.removeItem(WEATHER_LOCATION_CACHE_KEY);
+}
 function getDeviceLocation() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
@@ -471,14 +508,36 @@ async function fetchWeather(latitude, longitude, label) {
 }
 
 async function loadWeather() {
-  $("#weather-place").textContent = "Đang xác định vị trí...";
   $("#weather-description").textContent = "Đang tải thời tiết...";
+
+  const cachedLocation = getCachedWeatherLocation();
+
+  if (cachedLocation) {
+    try {
+      await fetchWeather(
+        cachedLocation.latitude,
+        cachedLocation.longitude,
+        cachedLocation.label
+      );
+      return;
+    } catch {
+      // Nếu lỗi mạng thời tiết, tiếp tục dùng luồng fallback bên dưới.
+    }
+  }
+
+  $("#weather-place").textContent = "Đang xác định vị trí...";
 
   try {
     const location = await getDeviceLocation();
     const label = await getLocationLabel(location.latitude, location.longitude);
-    await fetchWeather(location.latitude, location.longitude, label);
-  } catch (locationError) {
+    const savedLocation = cacheWeatherLocation({ ...location, label });
+
+    await fetchWeather(
+      savedLocation.latitude,
+      savedLocation.longitude,
+      savedLocation.label
+    );
+  } catch {
     try {
       await fetchWeather(
         WEATHER_FALLBACK_LOCATION.latitude,

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Cục Bột · An Khánh | New Tab",
-  "description": "Trang tab mới: Google Smart Search, thời tiết Tây Ninh, lịch và truy cập nhanh, bookmarks.",
+  "description": "Trang tab mới: Google Smart Search, thời tiết Tây Ninh, lịch và truy cập nhanh, bookmarks, history.",
   "version": "1.0.7",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
