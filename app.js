@@ -101,7 +101,9 @@ function normalizeSearchText(value) {
 function getBookmarkFaviconUrl(url, size = 32) {
   try {
     const hostname = new URL(normalizeUrl(url)).hostname;
+
     if (!hostname) return "";
+
     return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=${size}`;
   } catch {
     return "";
@@ -109,30 +111,24 @@ function getBookmarkFaviconUrl(url, size = 32) {
 }
 
 function setBookmarkIcon(element, bookmark) {
-  const faviconUrl = getDirectFaviconUrl(bookmark.url);
+  const fallback = (bookmark.title || "?")
+    .trim()
+    .slice(0, 1)
+    .toUpperCase();
 
-  // Mặc định là biểu tượng Internet
-  element.textContent = "🌐";
-  element.classList.add("is-fallback-icon");
+  const faviconUrl = getBookmarkFaviconUrl(bookmark.url);
+
+  element.textContent = fallback;
 
   if (!faviconUrl) return;
 
   const image = new Image();
   image.src = faviconUrl;
   image.alt = "";
-  image.decoding = "async";
-  image.loading = "lazy";
 
   image.onload = () => {
     element.textContent = "";
-    element.classList.remove("is-fallback-icon");
     element.appendChild(image);
-  };
-
-  image.onerror = () => {
-    image.remove();
-    element.textContent = "🌐";
-    element.classList.add("is-fallback-icon");
   };
 }
 
@@ -305,9 +301,10 @@ function getFaviconUrl(url, size = 64) {
 }
 
 function setAutomaticSiteIcon(element, site) {
-  const faviconUrl = getDirectFaviconUrl(normalizeUrl(site.url));
+  const fallback = getFallbackIcon(site);
+  const faviconUrl = getFaviconUrl(site.url);
 
-  element.textContent = "🌐";
+  element.textContent = fallback;
   element.classList.add("is-fallback-icon");
 
   if (!faviconUrl) return;
@@ -321,12 +318,6 @@ function setAutomaticSiteIcon(element, site) {
     element.textContent = "";
     element.classList.remove("is-fallback-icon");
     element.appendChild(image);
-  };
-
-  image.onerror = () => {
-    image.remove();
-    element.textContent = "🌐";
-    element.classList.add("is-fallback-icon");
   };
 }
 
