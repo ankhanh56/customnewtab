@@ -1,31 +1,38 @@
 <!doctype html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark" />
-  <title>Thiên Dật Vũ — 天逸宇</title>
+  <title>Cục Bột · An Khánh</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="./img/ayakakhung.webp">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=1.0.4" />
 </head>
+
 <body>
   <main class="dashboard">
     <header class="topbar">
-      <a class="brand" href="https://ankhanh56.github.io/" title="Mở Google">
+      <a class="brand" href="https://ankhanh56.github.io/" title="Home">
         <span class="brand-mark">✦</span>
         <span>Thiên Dật Vũ <b>— 天逸宇</b></span>
       </a>
 
       <form class="search" id="smart-search" novalidate>
         <span class="search-icon" aria-hidden="true">⌕</span>
-        <input id="search-input" type="search" autocomplete="off" spellcheck="false" placeholder="Tìm kiếm Google hoặc nhập địa chỉ trang web..." autofocus />
+        <input id="search-input" type="search" autocomplete="off" spellcheck="false"
+          placeholder="Tìm kiếm Google hoặc nhập địa chỉ trang web..." autofocus />
         <kbd>Enter</kbd>
       </form>
 
       <div class="top-actions">
-        <button id="settings-button" class="icon-button" title="Cài đặt truy cập nhanh" aria-label="Cài đặt truy cập nhanh">⚙</button>
+        <button id="settings-button" class="icon-button" title="Cài đặt truy cập nhanh"
+          aria-label="Cài đặt truy cập nhanh">⚙</button>
       </div>
     </header>
 
@@ -37,14 +44,10 @@
             <div class="avatar"> <img src=".//img/NSHM_PHOTO_2026_7_24_09_03_51.jpg" alt="">
             </div>
             <div>
-              <h1>Thiên Dật Vũ</h1>
+              <h1>Cục Bột</h1>
               <p>天逸宇 · An Khánh</p>
             </div>
           </div>
-          <!-- <div class="system-details">
-            <div><span>Trình duyệt</span><strong>Brave</strong></div>
-            <div><span>Chế độ</span><strong class="online"><i></i> Sẵn sàng</strong></div>
-          </div> -->
         </article>
 
         <article class="card calendar-card">
@@ -72,14 +75,14 @@
           <time id="clock" class="clock">00:00</time>
           <p id="full-date" class="full-date">Thứ Hai, ngày 31 tháng 8</p>
           <div class="hero-line"></div>
-          <p class="hero-note">Mở tab. Giữ nhịp. Hoàn thành việc quan trọng.</p>
+          <p class="hero-note">LHAnKhánh</p>
         </article>
 
         <article class="card weather-card">
           <div class="weather-main">
             <div id="weather-icon" class="weather-icon">☀</div>
             <div>
-              <p class="eyebrow">THỜI TIẾT · <span id="weather-place">Xã Đức Hòa, Tây Ninh</span></p>
+              <p class="eyebrow">THỜI TIẾT · <span id="weather-place">Tây Ninh</span></p>
               <div class="temperature"><span id="temperature">--</span><sup>°C</sup></div>
               <p id="weather-description" class="weather-description">Đang tải thời tiết...</p>
             </div>
@@ -92,11 +95,25 @@
         </article>
 
         <section class="section-heading">
-          <div><p class="eyebrow">TRUY CẬP NHANH</p></div>
+          <div>
+            <p class="eyebrow">TRUY CẬP NHANH</p>
+          </div>
           <span id="site-count" class="site-count">0 trang web</span>
         </section>
 
         <div class="site-grid" id="site-grid"></div>
+        <section class="section-heading bookmark-heading">
+          <div>
+            <p class="eyebrow">BOOKMARK</p>
+          </div>
+          <button id="refresh-bookmarks" class="bookmark-refresh" type="button" title="Làm mới bookmark">↻</button>
+        </section>
+
+        <section class="bookmark-card card">
+          <div id="bookmark-tree" class="bookmark-tree">
+            <p class="bookmark-loading">Đang tải bookmark...</p>
+          </div>
+        </section>
       </section>
     </section>
   </main>
@@ -110,7 +127,8 @@
         </div>
         <button value="cancel" class="close-button" aria-label="Đóng">×</button>
       </div>
-      <p class="field-help settings-intro">Thêm các trang bạn thường mở. URL có thể là `facebook.com`, `https://fast.com` hoặc địa chỉ nội bộ như `192.168.1.1`.</p>
+      <p class="field-help settings-intro">Thêm các trang bạn thường mở. URL có thể là `facebook.com`,
+        `https://fast.com` hoặc địa chỉ nội bộ như `192.168.1.1`.</p>
       <div id="site-settings"></div>
       <button type="button" id="add-site" class="secondary-button">+ Thêm trang web</button>
       <div class="settings-actions">
@@ -123,32 +141,24 @@
   <dialog id="notes-dialog">
     <section class="notes-panel">
       <div class="settings-head notes-head">
-  <div>
-    <p class="eyebrow">GHI CHÚ LỊCH</p>
-    <h2 id="notes-date-title">Ngày</h2>
-  </div>
+        <div>
+          <p class="eyebrow">GHI CHÚ LỊCH</p>
+          <h2 id="notes-date-title">Ngày</h2>
+        </div>
 
-  <div class="notes-toolbar">
-    <button
-      id="export-notes"
-      class="toolbar-button"
-      type="button"
-      title="Xuất toàn bộ note thành file JSON"
-    >
-      ⇩ Xuất JSON
-    </button>
+        <div class="notes-toolbar">
+          <button id="export-notes" class="toolbar-button" type="button" title="Xuất toàn bộ note thành file JSON">
+            ⇩ Xuất JSON
+          </button>
 
-    <label
-      class="toolbar-button import-button"
-      title="Nhập ghi chú từ file JSON"
-    >
-      ⇧ Nhập JSON
-      <input id="import-notes" type="file" accept=".json,application/json" hidden />
-    </label>
+          <label class="toolbar-button import-button" title="Nhập ghi chú từ file JSON">
+            ⇧ Nhập JSON
+            <input id="import-notes" type="file" accept=".json,application/json" hidden />
+          </label>
 
-    <button id="close-notes" class="close-button" aria-label="Đóng">×</button>
-  </div>
-</div>
+          <button id="close-notes" class="close-button" aria-label="Đóng">×</button>
+        </div>
+      </div>
 
       <div id="note-list" class="note-list"></div>
 
@@ -170,7 +180,8 @@
         </div>
         <label>
           Nội dung
-          <textarea id="note-content" rows="3" maxlength="500" placeholder="Nội dung, việc cần làm hoặc lời nhắc..."></textarea>
+          <textarea id="note-content" rows="3" maxlength="500"
+            placeholder="Nội dung, việc cần làm hoặc lời nhắc..."></textarea>
         </label>
         <button id="save-note" class="primary-button note-save" type="submit">+ Lưu ghi chú</button>
       </form>
@@ -201,7 +212,30 @@
       </div>
     </article>
   </template>
+  <template id="bookmark-folder-template">
+  <details class="bookmark-folder" open>
+    <summary>
+      <span class="folder-arrow">›</span>
+      <span class="folder-icon">▰</span>
+      <span class="bookmark-folder-title"></span>
+      <span class="bookmark-folder-count"></span>
+    </summary>
+    <div class="bookmark-children"></div>
+  </details>
+</template>
 
-  <script src="app.js"></script>
+<template id="bookmark-link-template">
+  <a class="bookmark-link" target="_blank" rel="noreferrer">
+    <span class="bookmark-link-icon"></span>
+    <span class="bookmark-link-text">
+      <span class="bookmark-link-title"></span>
+      <span class="bookmark-link-url"></span>
+    </span>
+    <span class="bookmark-open">↗</span>
+  </a>
+</template>
+
+  <script src="app.js?v=1.0.4"></script>
 </body>
+
 </html>

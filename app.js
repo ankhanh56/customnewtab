@@ -1,15 +1,19 @@
 const DEFAULT_SITES = [
-  { name: "Facebook", url: "facebook.com", icon: "f", color: "#1877f2" },
-  { name: "YouTube", url: "youtube.com", icon: "▶", color: "#e52222" },
-  { name: "Discord", url: "discord.com/app", icon: "◉", color: "#5865f2" },
+  { name: "Facebook", url: "facebook.com" },
+  { name: "YouTube", url: "youtube.com" },
+  { name: "Discord", url: "discord.com/app" },
 ];
 
 const QUOTES = [
-  "Tập trung vào điều quan trọng, rồi làm nó thật tốt.",
-  "Sự nhất quán biến kế hoạch nhỏ thành kết quả lớn.",
-  "Đừng chờ cảm hứng. Hãy bắt đầu, rồi cảm hứng sẽ đến.",
-  "Hôm nay là một cơ hội mới để xây điều bạn muốn thấy.",
-  "Làm chậm, làm đúng, và làm đến cùng.",
+  "Thanh xuân là một cuốn sách quá vội vã, chúng ta luôn muốn đọc thêm vài trang nữa.",
+  "Thanh xuân như một cơn mưa lớn, dù cảm lạnh vẫn muốn tắm thêm lần nữa.",
+  "Thích bạn chưa chắc đã yêu bạn; nhưng yêu bạn thì nhất định là rất thích bạn rồi.",
+  "Sau này chúng ta có tất cả, chỉ là không còn “chúng ta”.",
+  "Nơi nào có yêu thương, nơi đó sẽ có ánh sáng.",
+  "Đời người như một cuốn sách: sinh ra là bìa trước, mất đi là bìa sau, nội dung phải tự mình viết.",
+  "Đừng giả vờ nỗ lực, kết quả sẽ không diễn cùng bạn.",
+  "Lúc này tâm trạng không tốt, ngoài việc ăn được cơm thì chẳng muốn làm gì.",
+  "Hoa nở hoa tàn, nhân gian vô thường.",
 ];
 
 const WEATHER_CODES = {
@@ -46,7 +50,7 @@ const WEATHER_CODES = {
 const WEATHER_LOCATION = {
   latitude: 11.311,
   longitude: 106.094,
-  label: "Xã Đức Hòa, Tây Ninh",
+  label: "Tây Ninh",
 };
 
 const state = {
@@ -83,6 +87,156 @@ function normalizeUrl(value) {
 
 function getDisplayUrl(value) {
   return value.replace(/^[a-z][a-z\d+.-]*:\/\//i, "").replace(/\/$/, "");
+}
+function getBookmarkFaviconUrl(url, size = 32) {
+  try {
+    const hostname = new URL(normalizeUrl(url)).hostname;
+    if (!hostname) return "";
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=${size}`;
+  } catch {
+    return "";
+  }
+}
+
+function setBookmarkIcon(element, bookmark) {
+  const fallback = (bookmark.title || "?").trim().slice(0, 1).toUpperCase();
+  const faviconUrl = getBookmarkFaviconUrl(bookmark.url);
+  element.textContent = fallback;
+
+  if (!faviconUrl) return;
+
+  const image = new Image();
+  image.src = faviconUrl;
+  image.alt = "";
+  image.onload = () => {
+    element.textContent = "";
+    element.appendChild(image);
+  };
+}
+
+function countBookmarkLinks(nodes) {
+  return nodes.reduce((total, node) => {
+    if (node.url) return total + 1;
+    return total + countBookmarkLinks(node.children || []);
+  }, 0);
+}
+
+function createBookmarkLink(bookmark) {
+  const template = $("#bookmark-link-template");
+  const node = template.content.cloneNode(true);
+  const link = node.querySelector(".bookmark-link");
+  const icon = node.querySelector(".bookmark-link-icon");
+
+  link.href = bookmark.url;
+  link.title = bookmark.title || bookmark.url;
+  node.querySelector(".bookmark-link-title").textContent = bookmark.title || bookmark.url;
+  node.querySelector(".bookmark-link-url").textContent = getDisplayUrl(bookmark.url);
+  setBookmarkIcon(icon, bookmark);
+
+  return node;
+}
+
+function createBookmarkFolder(folder) {
+  const template = $("#bookmark-folder-template");
+  const node = template.content.cloneNode(true);
+  const details = node.querySelector(".bookmark-folder");
+  const children = node.querySelector(".bookmark-children");
+  const childNodes = folder.children || [];
+
+  details.dataset.bookmarkId = folder.id;
+  node.querySelector(".bookmark-folder-title").textContent = folder.title || "Không tên";
+  node.querySelector(".bookmark-folder-count").textContent = `${countBookmarkLinks(childNodes)} link`;
+
+  childNodes.forEach((child) => {
+    children.appendChild(child.url ? createBookmarkLink(child) : createBookmarkFolder(child));
+  });
+
+  return node;
+}
+
+function renderBookmarkTree(tree) {
+  const container = $("#bookmark-tree");
+  container.innerHTML = "";
+
+  const roots = tree.flatMap((root) => root.children || []);
+  const folders = roots.filter((node) => !node.url);
+  const links = roots.filter((node) => node.url);
+
+  if (!folders.length && !links.length) {
+    container.innerHTML = `<p class="bookmark-empty">Chưa có bookmark trong Brave.</p>`;
+    return;
+  }
+
+  folders.forEach((folder) => container.appendChild(createBookmarkFolder(folder)));
+  links.forEach((link) => container.appendChild(createBookmarkLink(link)));
+}
+
+function loadBookmarks() {
+  const refreshButton = $("#refresh-bookmarks");
+  refreshButton?.classList.add("is-loading");
+
+  if (!chrome?.bookmarks) {
+    $("#bookmark-tree").innerHTML = `<p class="bookmark-empty">Extension chưa có quyền đọc bookmark.</p>`;
+    refreshButton?.classList.remove("is-loading");
+    return;
+  }
+
+  chrome.bookmarks.getTree((tree) => {
+    if (chrome.runtime.lastError) {
+      $("#bookmark-tree").innerHTML = `<p class="bookmark-empty">Không thể đọc bookmark: ${chrome.runtime.lastError.message}</p>`;
+    } else {
+      renderBookmarkTree(tree);
+    }
+    refreshButton?.classList.remove("is-loading");
+  });
+}
+
+function watchBookmarks() {
+  if (!chrome?.bookmarks) return;
+  chrome.bookmarks.onCreated.addListener(loadBookmarks);
+  chrome.bookmarks.onRemoved.addListener(loadBookmarks);
+  chrome.bookmarks.onChanged.addListener(loadBookmarks);
+  chrome.bookmarks.onMoved.addListener(loadBookmarks);
+  chrome.bookmarks.onChildrenReordered.addListener(loadBookmarks);
+}
+function getHostname(url) {
+  try {
+    return new URL(normalizeUrl(url)).hostname;
+  } catch {
+    return "";
+  }
+}
+
+function getFallbackIcon(site) {
+  const hostname = getHostname(site.url);
+  const label = site.name?.trim() || hostname || "?";
+  return label.slice(0, 1).toUpperCase();
+}
+
+function getFaviconUrl(url, size = 64) {
+  const hostname = getHostname(url);
+  if (!hostname) return "";
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=${size}`;
+}
+
+function setAutomaticSiteIcon(element, site) {
+  const fallback = getFallbackIcon(site);
+  const faviconUrl = getFaviconUrl(site.url);
+
+  element.textContent = fallback;
+  element.classList.add("is-fallback-icon");
+
+  if (!faviconUrl) return;
+
+  const image = new Image();
+  image.src = faviconUrl;
+  image.alt = "";
+  image.decoding = "async";
+  image.onload = () => {
+    element.textContent = "";
+    element.classList.remove("is-fallback-icon");
+    element.appendChild(image);
+  };
 }
 
 function looksLikeUrl(value) {
@@ -221,17 +375,21 @@ function renderSites() {
   const grid = $("#site-grid");
   const template = $("#site-template");
   grid.innerHTML = "";
+
   state.sites.forEach((site) => {
     const node = template.content.cloneNode(true);
     const card = node.querySelector(".site-card");
     const icon = node.querySelector(".site-icon");
+
     card.href = normalizeUrl(site.url);
-    icon.textContent = site.icon || site.name.slice(0, 1).toUpperCase();
-    icon.style.setProperty("--site-color", site.color || "#41516a");
+    card.title = `Mở ${site.name}`;
+    setAutomaticSiteIcon(icon, site);
+
     node.querySelector("h3").textContent = site.name;
     node.querySelector("p").textContent = getDisplayUrl(site.url);
     grid.appendChild(node);
   });
+
   $("#site-count").textContent = `${state.sites.length} trang web`;
 }
 
@@ -261,15 +419,13 @@ function openSettings() {
 }
 
 function saveSettings() {
-  const existing = state.sites;
   state.sites = [...document.querySelectorAll(".site-setting-row")]
-    .map((row, index) => ({
+    .map((row) => ({
       name: row.querySelector(".setting-site-name").value.trim(),
-      url: row.querySelector(".setting-site-url").value.trim(),
-      icon: existing[index]?.icon || "◆",
-      color: existing[index]?.color || "#41516a",
+      url: row.querySelector(".setting-site-url").value.trim()
     }))
     .filter((site) => site.name && site.url);
+
   localStorage.setItem("tdv-sites", JSON.stringify(state.sites));
   renderSites();
 }
@@ -492,6 +648,7 @@ function setupEvents() {
 
   $("#export-notes").addEventListener("click", exportNotesToJson);
   $("#import-notes").addEventListener("change", importNotesFromJson);
+  $("#refresh-bookmarks").addEventListener("click", loadBookmarks);
 }
 
 function initialize() {
@@ -503,6 +660,9 @@ function initialize() {
   renderSites();
   setupEvents();
   loadWeather();
+  loadBookmarks();
+  watchBookmarks();
+  
 }
 
 initialize();
