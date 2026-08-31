@@ -109,18 +109,30 @@ function getBookmarkFaviconUrl(url, size = 32) {
 }
 
 function setBookmarkIcon(element, bookmark) {
-  const fallback = (bookmark.title || "?").trim().slice(0, 1).toUpperCase();
-  const faviconUrl = getBookmarkFaviconUrl(bookmark.url);
-  element.textContent = fallback;
+  const faviconUrl = getDirectFaviconUrl(bookmark.url);
+
+  // Mặc định là biểu tượng Internet
+  element.textContent = "🌐";
+  element.classList.add("is-fallback-icon");
 
   if (!faviconUrl) return;
 
   const image = new Image();
   image.src = faviconUrl;
   image.alt = "";
+  image.decoding = "async";
+  image.loading = "lazy";
+
   image.onload = () => {
     element.textContent = "";
+    element.classList.remove("is-fallback-icon");
     element.appendChild(image);
+  };
+
+  image.onerror = () => {
+    image.remove();
+    element.textContent = "🌐";
+    element.classList.add("is-fallback-icon");
   };
 }
 
@@ -293,10 +305,9 @@ function getFaviconUrl(url, size = 64) {
 }
 
 function setAutomaticSiteIcon(element, site) {
-  const fallback = getFallbackIcon(site);
-  const faviconUrl = getFaviconUrl(site.url);
+  const faviconUrl = getDirectFaviconUrl(normalizeUrl(site.url));
 
-  element.textContent = fallback;
+  element.textContent = "🌐";
   element.classList.add("is-fallback-icon");
 
   if (!faviconUrl) return;
@@ -305,10 +316,17 @@ function setAutomaticSiteIcon(element, site) {
   image.src = faviconUrl;
   image.alt = "";
   image.decoding = "async";
+
   image.onload = () => {
     element.textContent = "";
     element.classList.remove("is-fallback-icon");
     element.appendChild(image);
+  };
+
+  image.onerror = () => {
+    image.remove();
+    element.textContent = "🌐";
+    element.classList.add("is-fallback-icon");
   };
 }
 

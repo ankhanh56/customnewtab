@@ -1432,3 +1432,15 @@ body::-webkit-scrollbar {
     max-height: 350px;
   }
 }
+
+.bookmark-link-icon.is-fallback-icon {
+  background: #263747;
+  border: 1px solid #3e596e;
+  font-size: 13px;
+}
+
+.site-icon.is-fallback-icon {
+  background: #263747;
+  border: 1px solid #3e596e;
+  font-size: 19px;
+}
