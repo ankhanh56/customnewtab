@@ -1,8 +1,6 @@
-const DEFAULT_SITES = [
-  { name: "Facebook", url: "facebook.com" },
-  { name: "YouTube", url: "youtube.com" },
-  { name: "Discord", url: "discord.com/app" },
-];
+const DEFAULT_SITES = [];
+const SITES_LOCAL_FILE = "data/site.local.json";
+const SITES_EXAMPLE_FILE = "data/sites.example.json";
 
 const QUOTES = [
   "Thanh xuân là một cuốn sách quá vội vã, chúng ta luôn muốn đọc thêm vài trang nữa.",
@@ -59,9 +57,8 @@ const WEATHER_LOCATION_CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
 const state = {
   calendarDate: new Date(),
   selectedDateKey: "",
-  sites:
-    JSON.parse(localStorage.getItem("tdv-sites") || "null") || DEFAULT_SITES,
-  notes: JSON.parse(localStorage.getItem("tdv-calendar-notes") || "{}"),
+  sites: [],
+  notes: JSON.parse(localStorage.getItem("tdv-calendar-notes") || "{}")
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -974,21 +971,66 @@ function setupEvents() {
   $("#clear-bookmark-search").addEventListener("click", clearBookmarkSearch);
 
 }
+async function loadSitesFromJson(fileName) {
+  const url = chrome.runtime.getURL(fileName);
+  const response = await fetch(url, { cache: "no-store" });
 
-function initialize() {
+  if (!response.ok) {
+    throw new Error(`Không đọc được ${fileName}`);
+  }
+
+  const sites = await response.json();
+
+  if (!Array.isArray(sites)) {
+    throw new Error(`${fileName} phải là một mảng JSON`);
+  }
+
+  return sites
+    .filter((site) => site && typeof site.name === "string" && typeof site.url === "string")
+    .map((site) => ({
+      name: site.name.trim(),
+      url: site.url.trim()
+    }))
+    .filter((site) => site.name && site.url);
+}
+
+async function loadConfiguredSites() {
+  try {
+    state.sites = await loadSitesFromJson(SITES_LOCAL_FILE);
+  } catch {
+    try {
+      state.sites = await loadSitesFromJson(SITES_EXAMPLE_FILE);
+    } catch {
+      state.sites = DEFAULT_SITES;
+    }
+  }
+
+  renderSites();
+}
+async function initialize() {
   updateTime();
   setInterval(updateTime, 1000);
+
   renderCalendar();
+
   $("#daily-quote").textContent =
     QUOTES[Math.floor(Date.now() / 86400000) % QUOTES.length];
-  renderSites();
+
   setupEvents();
+
+  // Đọc danh sách Truy cập nhanh từ data/sites.local.json.
+  // Nếu không có file local, dùng data/sites.example.json.
+  await loadConfiguredSites();
+
   loadWeather();
+
   loadBookmarks();
   watchBookmarks();
+
   loadRecentHistory();
   watchHistory();
-  
 }
+
+initialize();
 
 initialize();
