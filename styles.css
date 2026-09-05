@@ -303,7 +303,7 @@ p {
 .weekdays,
 .calendar-days {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   text-align: center;
 }
 .weekdays {
@@ -317,6 +317,7 @@ p {
   display: grid;
   place-items: center;
   width: 100%;
+  min-width: 0;
   height: 28px;
   padding: 0;
   cursor: pointer;
@@ -564,7 +565,6 @@ p {
   white-space: nowrap;
 }
 
-#settings-dialog,
 #notes-dialog {
   width: min(620px, calc(100vw - 28px));
   max-height: min(780px, calc(100vh - 28px));
@@ -578,12 +578,11 @@ p {
 #notes-dialog {
   width: min(570px, calc(100vw - 28px));
 }
-#settings-dialog::backdrop,
 #notes-dialog::backdrop {
   background: rgba(2, 4, 7, 0.72);
   backdrop-filter: blur(4px);
 }
-.settings-panel,
+
 .notes-panel {
   overflow-y: auto;
   padding: 22px;
@@ -610,16 +609,7 @@ p {
   font-size: 10px;
   line-height: 1.55;
 }
-.settings-intro {
-  max-width: 475px;
-}
-.site-setting-row {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr 32px;
-  gap: 7px;
-  margin-bottom: 8px;
-}
-.settings-panel input,
+
 .note-form input,
 .note-form textarea {
   width: 100%;
@@ -629,7 +619,6 @@ p {
   color: #eaf0f5;
   background: #202630;
 }
-.settings-panel input,
 .note-form input {
   height: 40px;
   padding: 0 11px;
@@ -639,19 +628,12 @@ p {
   padding: 10px 11px;
   resize: vertical;
 }
-.settings-panel input:focus,
 .note-form input:focus,
 .note-form textarea:focus {
   border-color: #659b75;
   box-shadow: 0 0 0 3px rgba(119, 213, 144, 0.08);
 }
-.remove-site {
-  cursor: pointer;
-  border: 1px solid #3e3440;
-  border-radius: 8px;
-  color: #e18282;
-  background: #291f26;
-}
+
 .secondary-button,
 .primary-button {
   height: 37px;
@@ -670,14 +652,6 @@ p {
   border: 1px solid #91d7a3;
   color: #102116;
   background: #8ce3a5;
-}
-.settings-actions {
-  display: flex;
-  justify-content: end;
-  gap: 8px;
-  margin-top: 23px;
-  padding-top: 17px;
-  border-top: 1px solid var(--line);
 }
 
 .notes-head {
@@ -1225,14 +1199,12 @@ body::-webkit-scrollbar {
   display: none;
 }
 .note-list,
-.settings-panel,
 .notes-panel {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
 .note-list::-webkit-scrollbar,
-.settings-panel::-webkit-scrollbar,
 .notes-panel::-webkit-scrollbar {
   display: none;
 }
@@ -1433,3 +1405,252 @@ body::-webkit-scrollbar {
   }
 }
 
+/* Fix calendar: luôn đủ 7 cột */
+.calendar-days {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  grid-auto-flow: row !important;
+}
+
+.calendar-days button {
+  display: grid !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Gỡ cột lịch sử: dashboard trở lại 2 cột */
+.content-grid {
+  grid-template-columns: 250px minmax(0, 1fr);
+}
+
+.right-column,
+.history-card {
+  display: none;
+}
+
+/* Popup lịch sử */
+#history-dialog {
+  width: min(620px, calc(100vw - 28px));
+  max-height: min(720px, calc(100vh - 28px));
+  padding: 0;
+  border: 1px solid #3a4350;
+  border-radius: 17px;
+  color: var(--text);
+  background: #151a22;
+  box-shadow: 0 25px 85px rgba(0, 0, 0, .58);
+}
+
+#history-dialog::backdrop {
+  background: rgba(2, 4, 7, .72);
+  backdrop-filter: blur(4px);
+}
+
+.history-panel {
+  overflow-y: auto;
+  padding: 22px;
+}
+
+.history-dialog-head {
+  margin-bottom: 16px;
+}
+
+.history-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.history-refresh {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  cursor: pointer;
+  border: 1px solid #35404d;
+  border-radius: 8px;
+  color: #91a0af;
+  background: #1b212a;
+  font-size: 17px;
+  transition: .18s;
+}
+
+.history-refresh:hover {
+  border-color: #669274;
+  color: #a8e7b8;
+  background: #24332b;
+}
+
+.history-refresh.is-loading {
+  animation: history-spin .7s linear infinite;
+}
+
+.history-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  margin-bottom: 10px;
+  padding: 0 8px 0 11px;
+  border: 1px solid #303b48;
+  border-radius: 10px;
+  background: #1a2029;
+}
+
+.history-search-wrap:focus-within {
+  border-color: #5f9470;
+  box-shadow: 0 0 0 3px rgba(119, 213, 144, .08);
+}
+
+.history-search-icon {
+  color: #8290a1;
+  font-size: 20px;
+  line-height: 1;
+  transform: rotate(-18deg);
+}
+
+.history-search-wrap input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #dce5ec;
+  background: transparent;
+  font-size: 12px;
+}
+
+.history-search-wrap input::placeholder {
+  color: #677484;
+}
+
+.clear-history-search {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  border-radius: 6px;
+  color: #9eabb8;
+  background: transparent;
+  font-size: 17px;
+}
+
+.clear-history-search:hover {
+  color: #edf4f8;
+  background: #303946;
+}
+
+.history-list {
+  display: flex;
+  max-height: 500px;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.history-loading,
+.history-empty {
+  margin: 18px 7px;
+  color: #7c8998;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.history-item {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  min-height: 51px;
+  padding: 7px 8px;
+  border-radius: 9px;
+  transition: background .16s;
+}
+
+.history-item:hover {
+  background: #202832;
+}
+
+.history-icon {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 7px;
+  color: #eff5fa;
+  background: #405168;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.history-icon img {
+  display: block;
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+}
+
+.history-text {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.history-title,
+.history-domain {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-title {
+  color: #cbd5df;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.history-meta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  color: #718092;
+  font-size: 10px;
+}
+
+.history-domain {
+  min-width: 0;
+  max-width: 380px;
+}
+
+.history-time {
+  flex: 0 0 auto;
+  color: #657484;
+}
+
+/* Ẩn scrollbar popup/list nhưng vẫn cuộn */
+.history-panel,
+.history-list {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.history-panel::-webkit-scrollbar,
+.history-list::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .content-grid {
+    display: flex;
+    flex-direction: column;
+  }
+}

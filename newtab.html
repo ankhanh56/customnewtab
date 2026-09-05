@@ -31,15 +31,15 @@
       </form>
 
       <div class="top-actions">
-        <button id="settings-button" class="icon-button" title="Cài đặt truy cập nhanh"
-          aria-label="Cài đặt truy cập nhanh">⚙</button>
+        <button id="history-button" class="icon-button" title="Lịch sử duyệt web"
+          aria-label="Lịch sử duyệt web">◷</button>
       </div>
     </header>
 
     <section class="content-grid">
       <aside class="left-column">
         <article class="card system-card">
-          <p class="eyebrow">BẢNG ĐIỀU KHIỂN CÁ NHÂN</p>
+          <!-- <p class="eyebrow">BẢNG ĐIỀU KHIỂN CÁ NHÂN</p> -->
           <div class="profile-row">
             <div class="avatar"> <img src=".//img/NSHM_PHOTO_2026_7_24_09_03_51.jpg" alt="">
             </div>
@@ -125,43 +125,9 @@
           </div>
         </section>
       </section>
-      <aside class="right-column">
-  <article class="card history-card">
-    <div class="history-head">
-      <div>
-        <p class="eyebrow">LỊCH SỬ DUYỆT WEB</p>
-        <p class="history-subtitle">10 trang gần đây</p>
-      </div>
-      <button id="refresh-history" class="history-refresh" type="button" title="Làm mới lịch sử" aria-label="Làm mới lịch sử">↻</button>
-    </div>
-
-    <div id="history-list" class="history-list">
-      <p class="history-loading">Đang tải lịch sử...</p>
-    </div>
-  </article>
-</aside>
+      <aside class="right-column"></aside>
     </section>
   </main>
-
-  <dialog id="settings-dialog">
-    <form method="dialog" class="settings-panel" id="settings-form">
-      <div class="settings-head">
-        <div>
-          <p class="eyebrow">TÙY CHỈNH</p>
-          <h2>Truy cập nhanh</h2>
-        </div>
-        <button value="cancel" class="close-button" aria-label="Đóng">×</button>
-      </div>
-      <p class="field-help settings-intro">Thêm các trang bạn thường mở. URL có thể là `facebook.com`,
-        `https://fast.com` hoặc địa chỉ nội bộ như `192.168.1.1`.</p>
-      <div id="site-settings"></div>
-      <button type="button" id="add-site" class="secondary-button">+ Thêm trang web</button>
-      <div class="settings-actions">
-        <button value="cancel" class="secondary-button">Hủy</button>
-        <button type="submit" value="save" class="primary-button">Lưu thay đổi</button>
-      </div>
-    </form>
-  </dialog>
 
   <dialog id="notes-dialog">
     <section class="notes-panel">
@@ -212,6 +178,34 @@
       </form>
     </section>
   </dialog>
+  <dialog id="history-dialog">
+    <section class="history-panel">
+      <div class="settings-head history-dialog-head">
+        <div>
+          <p class="eyebrow">LỊCH SỬ DUYỆT WEB</p>
+          <h2>Trang gần đây</h2>
+        </div>
+
+        <div class="history-toolbar">
+          <button id="refresh-history" class="history-refresh" type="button" title="Làm mới lịch sử"
+            aria-label="Làm mới lịch sử">↻</button>
+          <button id="close-history" class="close-button" type="button" aria-label="Đóng">×</button>
+        </div>
+      </div>
+
+      <div class="history-search-wrap">
+        <span class="history-search-icon" aria-hidden="true">⌕</span>
+        <input id="history-search" type="search" autocomplete="off" spellcheck="false"
+          placeholder="Tìm trong lịch sử..." aria-label="Tìm trong lịch sử" />
+        <button id="clear-history-search" class="clear-history-search hidden" type="button" title="Xóa tìm kiếm"
+          aria-label="Xóa tìm kiếm">×</button>
+      </div>
+
+      <div id="history-list" class="history-list">
+        <p class="history-loading">Đang tải lịch sử...</p>
+      </div>
+    </section>
+  </dialog>
 
   <template id="site-template">
     <a class="site-card" rel="noreferrer">
@@ -259,18 +253,19 @@
       <span class="bookmark-open">↗</span>
     </a>
   </template>
+
   <template id="history-item-template">
-  <a class="history-item" rel="noreferrer">
-    <span class="history-icon"></span>
-    <span class="history-text">
-      <span class="history-title"></span>
-      <span class="history-meta">
-        <span class="history-domain"></span>
-        <span class="history-time"></span>
+    <a class="history-item" rel="noreferrer">
+      <span class="history-icon"></span>
+      <span class="history-text">
+        <span class="history-title"></span>
+        <span class="history-meta">
+          <span class="history-domain"></span>
+          <span class="history-time"></span>
+        </span>
       </span>
-    </span>
-  </a>
-</template>
+    </a>
+  </template>
 
   <script src="app.js?v=1.0.8"></script>
 </body>

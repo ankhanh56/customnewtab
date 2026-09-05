@@ -11,7 +11,7 @@ const QUOTES = [
   "Đời người như một cuốn sách: sinh ra là bìa trước, mất đi là bìa sau, nội dung phải tự mình viết.",
   "Đừng giả vờ nỗ lực, kết quả sẽ không diễn cùng bạn.",
   "Lúc này tâm trạng không tốt, ngoài việc ăn được cơm thì chẳng muốn làm gì.",
-  "Hoa nở hoa tàn, nhân gian vô thường.",
+  "Hoa nở hoa tàn, nhân gian vô thường."
 ];
 
 const WEATHER_CODES = {
@@ -42,17 +42,18 @@ const WEATHER_CODES = {
   86: ["🌨", "Mưa tuyết mạnh"],
   95: ["⛈", "Dông"],
   96: ["⛈", "Dông kèm mưa đá"],
-  99: ["⛈", "Dông mạnh kèm mưa đá"],
+  99: ["⛈", "Dông mạnh kèm mưa đá"]
 };
-
 
 const WEATHER_FALLBACK_LOCATION = {
   latitude: 10.789359,
   longitude: 106.652784,
-  label: "TP. Hồ Chí Minh",
+  label: "TP. Hồ Chí Minh"
 };
+
 const WEATHER_LOCATION_CACHE_KEY = "tdv-weather-location";
-const WEATHER_LOCATION_CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
+const WEATHER_LOCATION_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+const HISTORY_LIMIT = 50;
 
 const state = {
   calendarDate: new Date(),
@@ -61,33 +62,24 @@ const state = {
   notes: JSON.parse(localStorage.getItem("tdv-calendar-notes") || "{}")
 };
 
+let recentHistoryItems = [];
+
 const $ = (selector) => document.querySelector(selector);
 const pad = (number) => String(number).padStart(2, "0");
 
-function escapeHtml(value) {
-  return String(value).replace(
-    /[&<>'"]/g,
-    (character) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        "'": "&#39;",
-        '"': "&quot;",
-      })[character],
-  );
-}
-
 function normalizeUrl(value) {
-  const input = value.trim();
+  const input = String(value || "").trim();
   if (!input) return "";
   if (/^[a-z][a-z\d+.-]*:\/\//i.test(input)) return input;
   return `https://${input}`;
 }
 
 function getDisplayUrl(value) {
-  return value.replace(/^[a-z][a-z\d+.-]*:\/\//i, "").replace(/\/$/, "");
+  return String(value || "")
+    .replace(/^[a-z][a-z\d+.-]*:\/\//i, "")
+    .replace(/\/$/, "");
 }
+
 function normalizeSearchText(value) {
   return String(value || "")
     .toLocaleLowerCase("vi-VN")
@@ -95,26 +87,19 @@ function normalizeSearchText(value) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/đ/g, "d");
 }
-function getBookmarkFaviconUrl(url, size = 32) {
+
+function getHostname(url) {
   try {
-    const hostname = new URL(normalizeUrl(url)).hostname;
-
-    if (!hostname) return "";
-
-    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=${size}`;
+    return new URL(normalizeUrl(url)).hostname;
   } catch {
     return "";
   }
 }
 
-function setBookmarkIcon(element, bookmark) {
-  const fallback = (bookmark.title || "?")
-    .trim()
-    .slice(0, 1)
-    .toUpperCase();
 
-  const faviconUrl = getBookmarkFaviconUrl(bookmark.url);
 
+function setGoogleFavicon(element, url, fallback, size = 32) {
+  const faviconUrl = getFaviconUrl(url, size);
   element.textContent = fallback;
 
   if (!faviconUrl) return;
@@ -122,7 +107,80 @@ function setBookmarkIcon(element, bookmark) {
   const image = new Image();
   image.src = faviconUrl;
   image.alt = "";
+  image.decoding = "async";
+  image.loading = "lazy";
+  image.onload = () => {
+    element.textContent = "";
+    element.appendChild(image);
+  };
+}
 
+function getFallbackIcon(site) {
+  const hostname = getHostname(site.url);
+  const label = site.name?.trim() || hostname || "?";
+  return label.slice(0, 1).toUpperCase();
+}
+
+function getFaviconUrl(url, size = 64) {
+  try {
+    const hostname = new URL(normalizeUrl(url)).hostname;
+
+    if (!hostname) {
+      return "";
+    }
+
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=${size}`;
+  } catch {
+    return "";
+  }
+}
+
+function setAutomaticSiteIcon(element, site) {
+  const fallback = getFallbackIcon(site);
+  const faviconUrl = getFaviconUrl(site.url);
+
+  element.textContent = fallback;
+  element.classList.add("is-fallback-icon");
+
+  if (!faviconUrl) {
+    return;
+  }
+
+  const image = new Image();
+
+  image.onload = () => {
+    element.replaceChildren(image);
+    element.classList.remove("is-fallback-icon");
+  };
+
+  image.onerror = () => {
+    element.replaceChildren(document.createTextNode(fallback));
+    element.classList.add("is-fallback-icon");
+  };
+
+  image.src = faviconUrl;
+  image.alt = "";
+  image.decoding = "async";
+}
+
+function getBookmarkFaviconUrl(url, size = 32) {
+  const hostname = getHostname(url);
+  if (!hostname) return "";
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=${size}`;
+}
+
+function setBookmarkIcon(element, bookmark) {
+  const fallback = (bookmark.title || "?").trim().slice(0, 1).toUpperCase();
+  const faviconUrl = getBookmarkFaviconUrl(bookmark.url);
+  element.textContent = fallback;
+
+  if (!faviconUrl) return;
+
+  const image = new Image();
+  image.src = faviconUrl;
+  image.alt = "";
+  image.decoding = "async";
+  image.loading = "lazy";
   image.onload = () => {
     element.textContent = "";
     element.appendChild(image);
@@ -143,10 +201,11 @@ function createBookmarkLink(bookmark) {
   const icon = node.querySelector(".bookmark-link-icon");
 
   link.href = bookmark.url;
-link.dataset.searchText = normalizeSearchText(
-  `${bookmark.title || ""} ${bookmark.url || ""} ${bookmark.parentTitle || ""}`
-);
   link.title = bookmark.title || bookmark.url;
+  link.dataset.searchText = normalizeSearchText(
+    `${bookmark.title || ""} ${bookmark.url || ""} ${bookmark.parentTitle || ""}`
+  );
+
   node.querySelector(".bookmark-link-title").textContent = bookmark.title || bookmark.url;
   node.querySelector(".bookmark-link-url").textContent = getDisplayUrl(bookmark.url);
   setBookmarkIcon(icon, bookmark);
@@ -188,7 +247,7 @@ function renderBookmarkTree(tree) {
   const links = roots.filter((node) => node.url);
 
   if (!folders.length && !links.length) {
-    container.innerHTML = `<p class="bookmark-empty">Chưa có bookmark trong Brave.</p>`;
+    container.innerHTML = '<p class="bookmark-empty">Chưa có bookmark trong Brave.</p>';
     return;
   }
 
@@ -196,40 +255,13 @@ function renderBookmarkTree(tree) {
   links.forEach((link) => container.appendChild(createBookmarkLink(link)));
 }
 
-function loadBookmarks() {
-  const refreshButton = $("#refresh-bookmarks");
-  refreshButton?.classList.add("is-loading");
-
-  if (!chrome?.bookmarks) {
-    $("#bookmark-tree").innerHTML = `<p class="bookmark-empty">Extension chưa có quyền đọc bookmark.</p>`;
-    refreshButton?.classList.remove("is-loading");
-    return;
-  }
-
-  chrome.bookmarks.getTree((tree) => {
-    if (chrome.runtime.lastError) {
-      $("#bookmark-tree").innerHTML = `<p class="bookmark-empty">Không thể đọc bookmark: ${chrome.runtime.lastError.message}</p>`;
-    } else {
-      renderBookmarkTree(tree);
-      filterBookmarkTree($("#bookmark-search")?.value || "");
-    }
-    refreshButton?.classList.remove("is-loading");
-  });
-}
-
-function watchBookmarks() {
-  if (!chrome?.bookmarks) return;
-  chrome.bookmarks.onCreated.addListener(loadBookmarks);
-  chrome.bookmarks.onRemoved.addListener(loadBookmarks);
-  chrome.bookmarks.onChanged.addListener(loadBookmarks);
-  chrome.bookmarks.onMoved.addListener(loadBookmarks);
-  chrome.bookmarks.onChildrenReordered.addListener(loadBookmarks);
-}
 function filterBookmarkTree(rawQuery) {
   const query = normalizeSearchText(rawQuery).trim();
   const tree = $("#bookmark-tree");
   const result = $("#bookmark-search-result");
   const clearButton = $("#clear-bookmark-search");
+
+  if (!tree || !result || !clearButton) return;
 
   clearButton.classList.toggle("hidden", !query);
 
@@ -254,10 +286,10 @@ function filterBookmarkTree(rawQuery) {
   const folders = [...tree.querySelectorAll(".bookmark-folder")].reverse();
   folders.forEach((folder) => {
     const ownFolderMatches = folder.dataset.folderText?.includes(query);
-    const containsMatchedLink = [...folder.querySelectorAll(":scope .bookmark-link")]
+    const containsMatchedLink = [...folder.querySelectorAll(".bookmark-link")]
       .some((link) => !link.classList.contains("search-hidden"));
-    const containsVisibleFolder = [...folder.querySelectorAll(":scope .bookmark-folder")]
-      .some((childFolder) => !childFolder.classList.contains("search-hidden"));
+    const containsVisibleFolder = [...folder.querySelectorAll(".bookmark-folder")]
+      .some((childFolder) => childFolder !== folder && !childFolder.classList.contains("search-hidden"));
     const isVisible = ownFolderMatches || containsMatchedLink || containsVisibleFolder;
 
     folder.classList.toggle("search-hidden", !isVisible);
@@ -277,66 +309,54 @@ function clearBookmarkSearch() {
   $("#bookmark-search").focus();
 }
 
-function getHostname(url) {
-  try {
-    return new URL(normalizeUrl(url)).hostname;
-  } catch {
-    return "";
+function loadBookmarks() {
+  const refreshButton = $("#refresh-bookmarks");
+  refreshButton?.classList.add("is-loading");
+
+  if (!chrome.bookmarks) {
+    $("#bookmark-tree").innerHTML = '<p class="bookmark-empty">Extension chưa có quyền đọc bookmark.</p>';
+    refreshButton?.classList.remove("is-loading");
+    return;
   }
+
+  chrome.bookmarks.getTree((tree) => {
+    if (chrome.runtime.lastError) {
+      $("#bookmark-tree").innerHTML = `<p class="bookmark-empty">Không thể đọc bookmark: ${chrome.runtime.lastError.message}</p>`;
+    } else {
+      renderBookmarkTree(tree);
+      filterBookmarkTree($("#bookmark-search")?.value || "");
+    }
+    refreshButton?.classList.remove("is-loading");
+  });
 }
 
-function getFallbackIcon(site) {
-  const hostname = getHostname(site.url);
-  const label = site.name?.trim() || hostname || "?";
-  return label.slice(0, 1).toUpperCase();
-}
-
-function getFaviconUrl(url, size = 64) {
-  const hostname = getHostname(url);
-  if (!hostname) return "";
-  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=${size}`;
-}
-
-function setAutomaticSiteIcon(element, site) {
-  const fallback = getFallbackIcon(site);
-  const faviconUrl = getFaviconUrl(site.url);
-
-  element.textContent = fallback;
-  element.classList.add("is-fallback-icon");
-
-  if (!faviconUrl) return;
-
-  const image = new Image();
-  image.src = faviconUrl;
-  image.alt = "";
-  image.decoding = "async";
-
-  image.onload = () => {
-    element.textContent = "";
-    element.classList.remove("is-fallback-icon");
-    element.appendChild(image);
-  };
+function watchBookmarks() {
+  if (!chrome.bookmarks) return;
+  chrome.bookmarks.onCreated.addListener(loadBookmarks);
+  chrome.bookmarks.onRemoved.addListener(loadBookmarks);
+  chrome.bookmarks.onChanged.addListener(loadBookmarks);
+  chrome.bookmarks.onMoved.addListener(loadBookmarks);
+  chrome.bookmarks.onChildrenReordered.addListener(loadBookmarks);
 }
 
 function looksLikeUrl(value) {
-  const text = value.trim();
+  const text = String(value || "").trim();
   if (!text || /\s/.test(text)) return false;
   if (/^[a-z][a-z\d+.-]*:\/\//i.test(text)) return true;
   if (/^localhost(?::\d+)?(?:\/.*)?$/i.test(text)) return true;
   if (/^(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?(?:\/.*)?$/.test(text)) return true;
-  return /^(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?\.)+[a-z]{2,}(?::\d+)?(?:\/[^\s]*)?$/i.test(
-    text,
-  );
+  return /^(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?\.)+[a-z]{2,}(?::\d+)?(?:\/[^\s]*)?$/i.test(text);
 }
 
 function submitSmartSearch(event) {
   event.preventDefault();
   const query = $("#search-input").value.trim();
   if (!query) return;
+
   window.location.assign(
     looksLikeUrl(query)
       ? normalizeUrl(query)
-      : `https://www.google.com/search?q=${encodeURIComponent(query)}`,
+      : `https://www.google.com/search?q=${encodeURIComponent(query)}`
   );
 }
 
@@ -350,7 +370,7 @@ function formatNoteDate(key) {
     weekday: "long",
     day: "numeric",
     month: "long",
-    year: "numeric",
+    year: "numeric"
   })
     .format(new Date(year, month - 1, day))
     .replace(/^./, (char) => char.toUpperCase());
@@ -363,23 +383,22 @@ function saveNotes() {
 function updateTime() {
   const now = new Date();
   $("#clock").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
   $("#full-date").textContent = new Intl.DateTimeFormat("vi-VN", {
     weekday: "long",
     day: "numeric",
     month: "long",
-    year: "numeric",
+    year: "numeric"
   })
     .format(now)
     .replace(/^./, (char) => char.toUpperCase());
+
   const hour = now.getHours();
   $("#greeting").textContent =
-    hour < 11
-      ? "CHÀO BUỔI SÁNG"
-      : hour < 14
-        ? "CHÀO BUỔI TRƯA"
-        : hour < 18
-          ? "CHÀO BUỔI CHIỀU"
-          : "CHÀO BUỔI TỐI";
+    hour < 11 ? "CHÀO BUỔI SÁNG" :
+    hour < 14 ? "CHÀO BUỔI TRƯA" :
+    hour < 18 ? "CHÀO BUỔI CHIỀU" :
+    "CHÀO BUỔI TỐI";
 }
 
 function renderCalendar() {
@@ -387,42 +406,60 @@ function renderCalendar() {
   const year = display.getFullYear();
   const month = display.getMonth();
   const today = new Date();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const previousMonthDays = new Date(year, month, 0).getDate();
+  const firstDayOfWeek = new Date(year, month, 1).getDay();
+  const daysInCurrentMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPreviousMonth = new Date(year, month, 0).getDate();
 
   $("#calendar-title").textContent = new Intl.DateTimeFormat("vi-VN", {
     month: "long",
-    year: "numeric",
+    year: "numeric"
   })
-    .format(display)
+    .format(new Date(year, month, 1))
     .replace(/^./, (char) => char.toUpperCase());
 
-  let html = "";
-  for (let index = firstDay - 1; index >= 0; index--)
-    html += `<button type="button" class="muted-day" tabindex="-1">${previousMonthDays - index}</button>`;
-  for (let day = 1; day <= daysInMonth; day++) {
+  const cells = [];
+
+  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+    cells.push(`<button type="button" class="muted-day" tabindex="-1" disabled>${daysInPreviousMonth - i}</button>`);
+  }
+
+  for (let day = 1; day <= daysInCurrentMonth; day++) {
     const key = dateKey(year, month, day);
     const isToday =
       day === today.getDate() &&
       month === today.getMonth() &&
       year === today.getFullYear();
-    const hasNote = state.notes[key]?.length > 0;
-    html += `<button type="button" class="calendar-day${isToday ? " today" : ""}${hasNote ? " has-note" : ""}" data-date="${key}" title="${hasNote ? `${state.notes[key].length} ghi chú` : "Thêm ghi chú"}"><span class="day-number">${day}</span></button>`;
+    const hasNote = Array.isArray(state.notes[key]) && state.notes[key].length > 0;
+
+    cells.push(`
+      <button
+        type="button"
+        class="calendar-day${isToday ? " today" : ""}${hasNote ? " has-note" : ""}"
+        data-date="${key}"
+        title="${hasNote ? `${state.notes[key].length} ghi chú` : "Thêm ghi chú"}"
+      >
+        <span class="day-number">${day}</span>
+      </button>
+    `);
   }
-  const remaining = (7 - ((firstDay + daysInMonth) % 7)) % 7;
-  for (let day = 1; day <= remaining; day++)
-    html += `<button type="button" class="muted-day" tabindex="-1">${day}</button>`;
-  $("#calendar-days").innerHTML = html;
+
+  const filledCells = firstDayOfWeek + daysInCurrentMonth;
+  const nextMonthCells = (7 - (filledCells % 7)) % 7;
+
+  for (let day = 1; day <= nextMonthCells; day++) {
+    cells.push(`<button type="button" class="muted-day" tabindex="-1" disabled>${day}</button>`);
+  }
+
+  $("#calendar-days").innerHTML = cells.join("");
 
   document.querySelectorAll(".calendar-day").forEach((button) => {
     button.addEventListener("click", () => openNotes(button.dataset.date));
   });
 }
+
 function getCachedWeatherLocation() {
   try {
     const cached = JSON.parse(localStorage.getItem(WEATHER_LOCATION_CACHE_KEY));
-
     if (
       !cached ||
       !Number.isFinite(cached.latitude) ||
@@ -432,8 +469,7 @@ function getCachedWeatherLocation() {
       return null;
     }
 
-    const isExpired = Date.now() - cached.savedAt > WEATHER_LOCATION_CACHE_TTL;
-    return isExpired ? null : cached;
+    return Date.now() - cached.savedAt > WEATHER_LOCATION_CACHE_TTL ? null : cached;
   } catch {
     return null;
   }
@@ -451,9 +487,6 @@ function cacheWeatherLocation(location) {
   return payload;
 }
 
-function clearCachedWeatherLocation() {
-  localStorage.removeItem(WEATHER_LOCATION_CACHE_KEY);
-}
 function getDeviceLocation() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
@@ -487,9 +520,7 @@ async function getLocationLabel(latitude, longitude) {
 
     const data = await response.json();
     const place = data.results?.[0];
-    if (!place) return "Vị trí hiện tại";
-
-    return place.admin1 || place.name || "Vị trí hiện tại";
+    return place?.admin1 || place?.name || "Vị trí hiện tại";
   } catch {
     return "Vị trí hiện tại";
   }
@@ -517,17 +548,12 @@ async function loadWeather() {
   $("#weather-description").textContent = "Đang tải thời tiết...";
 
   const cachedLocation = getCachedWeatherLocation();
-
   if (cachedLocation) {
     try {
-      await fetchWeather(
-        cachedLocation.latitude,
-        cachedLocation.longitude,
-        cachedLocation.label
-      );
+      await fetchWeather(cachedLocation.latitude, cachedLocation.longitude, cachedLocation.label);
       return;
     } catch {
-      // Nếu lỗi mạng thời tiết, tiếp tục dùng luồng fallback bên dưới.
+      // Tiếp tục lấy vị trí mới hoặc dùng fallback khi API weather lỗi.
     }
   }
 
@@ -537,12 +563,7 @@ async function loadWeather() {
     const location = await getDeviceLocation();
     const label = await getLocationLabel(location.latitude, location.longitude);
     const savedLocation = cacheWeatherLocation({ ...location, label });
-
-    await fetchWeather(
-      savedLocation.latitude,
-      savedLocation.longitude,
-      savedLocation.label
-    );
+    await fetchWeather(savedLocation.latitude, savedLocation.longitude, savedLocation.label);
   } catch {
     try {
       await fetchWeather(
@@ -574,7 +595,6 @@ function renderSites() {
     card.href = normalizeUrl(site.url);
     card.title = `Mở ${site.name}`;
     setAutomaticSiteIcon(icon, site);
-
     node.querySelector("h3").textContent = site.name;
     node.querySelector("p").textContent = getDisplayUrl(site.url);
     grid.appendChild(node);
@@ -583,77 +603,33 @@ function renderSites() {
   $("#site-count").textContent = `${state.sites.length} trang web`;
 }
 
-function renderSettingsSites() {
-  const container = $("#site-settings");
-  container.innerHTML = "";
-  state.sites.forEach((site) => addSettingsRow(site));
-}
-
-function addSettingsRow(site = { name: "Trang web mới", url: "" }) {
-  const row = document.createElement("div");
-  row.className = "site-setting-row";
-  row.innerHTML = `
-    <input class="setting-site-name" aria-label="Tên trang web" value="${escapeHtml(site.name)}" placeholder="Tên trang web" />
-    <input class="setting-site-url" aria-label="URL trang web" value="${escapeHtml(site.url)}" placeholder="facebook.com hoặc https://..." />
-    <button type="button" class="remove-site" title="Xóa trang web">×</button>
-  `;
-  row
-    .querySelector(".remove-site")
-    .addEventListener("click", () => row.remove());
-  $("#site-settings").appendChild(row);
-}
-
-function openSettings() {
-  renderSettingsSites();
-  $("#settings-dialog").showModal();
-}
-
-function saveSettings() {
-  state.sites = [...document.querySelectorAll(".site-setting-row")]
-    .map((row) => ({
-      name: row.querySelector(".setting-site-name").value.trim(),
-      url: row.querySelector(".setting-site-url").value.trim()
-    }))
-    .filter((site) => site.name && site.url);
-
-  localStorage.setItem("tdv-sites", JSON.stringify(state.sites));
-  renderSites();
-}
-
 function getNotesForSelectedDate() {
   return state.notes[state.selectedDateKey] || [];
 }
 
 function sortNotes(notes) {
-  return [...notes].sort((a, b) =>
-    (a.time || "99:99").localeCompare(b.time || "99:99"),
-  );
+  return [...notes].sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
 }
 
 function renderNotes() {
   const container = $("#note-list");
   const notes = sortNotes(getNotesForSelectedDate());
+  const template = $("#note-template");
   container.innerHTML = "";
 
   if (!notes.length) {
-    container.innerHTML = `<p class="empty-notes">Chưa có ghi chú cho ngày này.<br>Thêm việc cần làm, lịch hẹn hoặc một lời nhắc ở bên dưới.</p>`;
+    container.innerHTML = '<p class="empty-notes">Chưa có ghi chú cho ngày này.<br>Thêm việc cần làm, lịch hẹn hoặc một lời nhắc ở bên dưới.</p>';
     return;
   }
 
-  const template = $("#note-template");
   notes.forEach((note) => {
     const node = template.content.cloneNode(true);
-    const item = node.querySelector(".note-item");
-    item.dataset.noteId = note.id;
+    node.querySelector(".note-item").dataset.noteId = note.id;
     node.querySelector(".note-time").textContent = note.time || "";
     node.querySelector("h3").textContent = note.title;
     node.querySelector("p").textContent = note.content || "";
-    node
-      .querySelector(".edit-note")
-      .addEventListener("click", () => startEditNote(note.id));
-    node
-      .querySelector(".delete-note")
-      .addEventListener("click", () => deleteNote(note.id));
+    node.querySelector(".edit-note").addEventListener("click", () => startEditNote(note.id));
+    node.querySelector(".delete-note").addEventListener("click", () => deleteNote(note.id));
     container.appendChild(node);
   });
 }
@@ -677,6 +653,7 @@ function openNotes(key) {
 function startEditNote(noteId) {
   const note = getNotesForSelectedDate().find((item) => item.id === noteId);
   if (!note) return;
+
   $("#note-id").value = note.id;
   $("#note-time").value = note.time || "";
   $("#note-title").value = note.title;
@@ -693,6 +670,7 @@ function submitNote(event) {
   const title = $("#note-title").value.trim();
   const time = $("#note-time").value;
   const content = $("#note-content").value.trim();
+
   if (!title || !state.selectedDateKey) return;
 
   const notes = getNotesForSelectedDate();
@@ -704,9 +682,10 @@ function submitNote(event) {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       title,
       time,
-      content,
+      content
     });
   }
+
   state.notes[state.selectedDateKey] = notes;
   saveNotes();
   clearNoteForm();
@@ -718,11 +697,10 @@ function deleteNote(noteId) {
   const notes = getNotesForSelectedDate();
   const note = notes.find((item) => item.id === noteId);
   if (!note || !confirm(`Xóa ghi chú “${note.title}”?`)) return;
-  state.notes[state.selectedDateKey] = notes.filter(
-    (item) => item.id !== noteId,
-  );
-  if (!state.notes[state.selectedDateKey].length)
-    delete state.notes[state.selectedDateKey];
+
+  state.notes[state.selectedDateKey] = notes.filter((item) => item.id !== noteId);
+  if (!state.notes[state.selectedDateKey].length) delete state.notes[state.selectedDateKey];
+
   saveNotes();
   clearNoteForm();
   renderNotes();
@@ -734,13 +712,13 @@ function exportNotesToJson() {
     app: "Thiên Dật Vũ - 天逸宇 New Tab",
     version: 1,
     exportedAt: new Date().toISOString(),
-    notes: state.notes,
+    notes: state.notes
   };
 
-  const json = JSON.stringify(backup, null, 2);
-  const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {
+    type: "application/json;charset=utf-8"
+  });
   const url = URL.createObjectURL(blob);
-
   const link = document.createElement("a");
   const date = new Date().toISOString().slice(0, 10);
 
@@ -749,7 +727,6 @@ function exportNotesToJson() {
   document.body.appendChild(link);
   link.click();
   link.remove();
-
   URL.revokeObjectURL(url);
 }
 
@@ -758,43 +735,26 @@ async function importNotesFromJson(event) {
   if (!file) return;
 
   try {
-    const raw = await file.text();
-    const parsed = JSON.parse(raw);
-
+    const parsed = JSON.parse(await file.text());
     const importedNotes = parsed.notes ?? parsed;
 
-    if (
-      !importedNotes ||
-      typeof importedNotes !== "object" ||
-      Array.isArray(importedNotes)
-    ) {
-      throw new Error("Sai cấu trúc dữ liệu note");
+    if (!importedNotes || typeof importedNotes !== "object" || Array.isArray(importedNotes)) {
+      throw new Error("Sai cấu trúc note");
     }
 
-    const shouldReplace = confirm(
-      "Nhập file này sẽ thay thế toàn bộ note hiện tại. Bạn có muốn tiếp tục không?",
-    );
-
-    if (!shouldReplace) return;
+    if (!confirm("Nhập file này sẽ thay thế toàn bộ note hiện tại. Bạn có muốn tiếp tục không?")) return;
 
     state.notes = importedNotes;
     saveNotes();
     renderCalendar();
-
-    if ($("#notes-dialog").open && state.selectedDateKey) {
-      renderNotes();
-    }
-
+    if ($("#notes-dialog").open && state.selectedDateKey) renderNotes();
     alert("Đã nhập note thành công.");
-  } catch (error) {
-    alert(
-      "Không thể đọc file JSON. Hãy chắc chắn bạn chọn đúng file note đã xuất từ dashboard.",
-    );
+  } catch {
+    alert("Không thể đọc file JSON. Hãy chọn đúng file note đã xuất từ dashboard.");
   } finally {
     event.target.value = "";
   }
 }
-const HISTORY_LIMIT = 10;
 
 function isAllowedHistoryUrl(url) {
   return Boolean(url) && !/^(brave|chrome|chrome-extension|about|file):/i.test(url);
@@ -806,12 +766,6 @@ function getHistoryHostname(url) {
   } catch {
     return "";
   }
-}
-
-function getHistoryFaviconUrl(url, size = 32) {
-  const hostname = getHistoryHostname(url);
-  if (!hostname) return "";
-  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=${size}`;
 }
 
 function formatHistoryTime(timestamp) {
@@ -828,25 +782,48 @@ function formatHistoryTime(timestamp) {
     month: "2-digit"
   }).format(date);
 }
+function getHistoryFaviconUrl(url, size = 32) {
+  try {
+    const hostname = new URL(url).hostname;
+
+    if (!hostname) {
+      return "";
+    }
+
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=${size}`;
+  } catch {
+    return "";
+  }
+}
 
 function setHistoryIcon(element, item) {
   const fallback = (item.title || getHistoryHostname(item.url) || "?")
     .trim()
     .slice(0, 1)
     .toUpperCase();
+
   const faviconUrl = getHistoryFaviconUrl(item.url);
 
   element.textContent = fallback;
-  if (!faviconUrl) return;
+
+  if (!faviconUrl) {
+    return;
+  }
 
   const image = new Image();
+
+  image.onload = () => {
+    element.replaceChildren(image);
+  };
+
+  image.onerror = () => {
+    element.replaceChildren(document.createTextNode(fallback));
+  };
+
   image.src = faviconUrl;
   image.alt = "";
   image.decoding = "async";
-  image.onload = () => {
-    element.textContent = "";
-    element.appendChild(image);
-  };
+  image.loading = "lazy";
 }
 
 function renderHistory(items) {
@@ -855,7 +832,7 @@ function renderHistory(items) {
   list.innerHTML = "";
 
   if (!items.length) {
-    list.innerHTML = `<p class="history-empty">Chưa có trang web phù hợp trong lịch sử.</p>`;
+    list.innerHTML = '<p class="history-empty">Không tìm thấy trang phù hợp trong lịch sử.</p>';
     return;
   }
 
@@ -874,163 +851,206 @@ function renderHistory(items) {
   });
 }
 
+function filterHistory(rawQuery) {
+  const query = rawQuery.trim().toLocaleLowerCase("vi-VN");
+  $("#clear-history-search").classList.toggle("hidden", !query);
+
+  if (!query) {
+    renderHistory(recentHistoryItems);
+    return;
+  }
+
+  const filtered = recentHistoryItems.filter((item) => {
+    const text = `${item.title || ""} ${item.url || ""}`.toLocaleLowerCase("vi-VN");
+    return text.includes(query);
+  });
+
+  renderHistory(filtered);
+}
+
 function loadRecentHistory() {
   const refreshButton = $("#refresh-history");
   refreshButton?.classList.add("is-loading");
 
-  if (!chrome?.history) {
-    $("#history-list").innerHTML = `<p class="history-empty">Extension chưa có quyền đọc lịch sử.</p>`;
+  if (!chrome.history) {
+    $("#history-list").innerHTML = '<p class="history-empty">Extension chưa có quyền đọc lịch sử.</p>';
     refreshButton?.classList.remove("is-loading");
     return;
   }
 
-  chrome.history.search(
-    {
-      text: "",
-      startTime: 0,
-      maxResults: 100
-    },
-    (results) => {
-      if (chrome.runtime.lastError) {
-        $("#history-list").innerHTML = `<p class="history-empty">Không thể đọc lịch sử: ${chrome.runtime.lastError.message}</p>`;
-      } else {
-        const recent = results
-          .filter((item) => isAllowedHistoryUrl(item.url))
-          .sort((a, b) => (b.lastVisitTime || 0) - (a.lastVisitTime || 0))
-          .slice(0, HISTORY_LIMIT);
-        renderHistory(recent);
-      }
-      refreshButton?.classList.remove("is-loading");
+  chrome.history.search({ text: "", startTime: 0, maxResults: 150 }, (results) => {
+    if (chrome.runtime.lastError) {
+      $("#history-list").innerHTML = `<p class="history-empty">Không thể đọc lịch sử: ${chrome.runtime.lastError.message}</p>`;
+    } else {
+      recentHistoryItems = results
+        .filter((item) => isAllowedHistoryUrl(item.url))
+        .sort((a, b) => (b.lastVisitTime || 0) - (a.lastVisitTime || 0))
+        .slice(0, HISTORY_LIMIT);
+
+      filterHistory($("#history-search")?.value || "");
     }
-  );
+
+    refreshButton?.classList.remove("is-loading");
+  });
+}
+
+function openHistoryDialog() {
+  const dialog = $("#history-dialog");
+  if (!dialog.open) dialog.showModal();
+
+  $("#history-search").value = "";
+  loadRecentHistory();
+  setTimeout(() => $("#history-search")?.focus(), 60);
+}
+
+function closeHistoryDialog() {
+  $("#history-dialog")?.close();
+}
+
+function clearHistorySearch() {
+  $("#history-search").value = "";
+  filterHistory("");
+  $("#history-search").focus();
 }
 
 function watchHistory() {
-  if (!chrome?.history) return;
-  chrome.history.onVisited.addListener(() => loadRecentHistory());
-  chrome.history.onVisitRemoved.addListener(() => loadRecentHistory());
+  if (!chrome.history) return;
+
+  chrome.history.onVisited.addListener(() => {
+    if ($("#history-dialog")?.open) loadRecentHistory();
+  });
+
+  chrome.history.onVisitRemoved.addListener(() => {
+    if ($("#history-dialog")?.open) loadRecentHistory();
+  });
 }
 
-function setupEvents() {
-  $("#smart-search").addEventListener("submit", submitSmartSearch);
-  document.addEventListener("keydown", (event) => {
-
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
-  event.preventDefault();
-  $("#bookmark-search").focus();
-  $("#refresh-history").addEventListener("click", loadRecentHistory);
-  return;
-}
-
-    if (
-      event.key === "/" &&
-      document.activeElement?.tagName !== "INPUT" &&
-      document.activeElement?.tagName !== "TEXTAREA" &&
-      !$("#settings-dialog").open &&
-      !$("#notes-dialog").open
-    ) {
-      event.preventDefault();
-      $("#search-input").focus();
-    }
-    if (event.key === "Escape" && $("#notes-dialog").open)
-      $("#notes-dialog").close();
-  });
-  $("#previous-month").addEventListener("click", () => {
-    state.calendarDate = new Date(
-      state.calendarDate.getFullYear(),
-      state.calendarDate.getMonth() - 1,
-      1,
-    );
-    renderCalendar();
-  });
-  $("#next-month").addEventListener("click", () => {
-    state.calendarDate = new Date(
-      state.calendarDate.getFullYear(),
-      state.calendarDate.getMonth() + 1,
-      1,
-    );
-    renderCalendar();
-  });
-  $("#settings-button").addEventListener("click", openSettings);
-  $("#add-site").addEventListener("click", () => addSettingsRow());
-  $("#settings-form").addEventListener("submit", (event) => {
-    if (event.submitter?.value === "save") saveSettings();
-  });
-  $("#close-notes").addEventListener("click", () => $("#notes-dialog").close());
-  $("#note-form").addEventListener("submit", submitNote);
-  $("#cancel-edit").addEventListener("click", clearNoteForm);
-
-  $("#export-notes").addEventListener("click", exportNotesToJson);
-  $("#import-notes").addEventListener("change", importNotesFromJson);
-  $("#refresh-bookmarks").addEventListener("click", loadBookmarks);
-
-  $("#bookmark-search").addEventListener("input", (event) => {
-  filterBookmarkTree(event.target.value);
-});
-
-  $("#clear-bookmark-search").addEventListener("click", clearBookmarkSearch);
-
-}
 async function loadSitesFromJson(fileName) {
   const url = chrome.runtime.getURL(fileName);
-  const response = await fetch(url, { cache: "no-store" });
+
+  const response = await fetch(url, {
+    cache: "no-store"
+  });
 
   if (!response.ok) {
-    throw new Error(`Không đọc được ${fileName}`);
+    throw new Error(`Không đọc được ${fileName}: HTTP ${response.status}`);
   }
 
   const sites = await response.json();
 
   if (!Array.isArray(sites)) {
-    throw new Error(`${fileName} phải là một mảng JSON`);
+    throw new Error(`${fileName} phải có dạng mảng JSON`);
   }
 
   return sites
-    .filter((site) => site && typeof site.name === "string" && typeof site.url === "string")
-    .map((site) => ({
+    .filter(site => {
+      return (
+        site &&
+        typeof site.name === "string" &&
+        typeof site.url === "string" &&
+        site.name.trim() &&
+        site.url.trim()
+      );
+    })
+    .map(site => ({
       name: site.name.trim(),
       url: site.url.trim()
-    }))
-    .filter((site) => site.name && site.url);
+    }));
 }
 
 async function loadConfiguredSites() {
-  try {
-    state.sites = await loadSitesFromJson(SITES_LOCAL_FILE);
-  } catch {
+  const files = [
+    SITES_LOCAL_FILE,
+    SITES_EXAMPLE_FILE
+  ];
+
+  for (const fileName of files) {
     try {
-      state.sites = await loadSitesFromJson(SITES_EXAMPLE_FILE);
+      state.sites = await loadSitesFromJson(fileName);
+      renderSites();
+      return;
     } catch {
-      state.sites = DEFAULT_SITES;
+      // Thử file tiếp theo.
     }
   }
 
+  state.sites = DEFAULT_SITES;
   renderSites();
 }
+
+function setupEvents() {
+  $("#smart-search")?.addEventListener("submit", submitSmartSearch);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && $("#history-dialog")?.open) {
+      closeHistoryDialog();
+      return;
+    }
+    if (
+  event.key === "/" &&
+  document.activeElement?.tagName !== "INPUT" &&
+  document.activeElement?.tagName !== "TEXTAREA" &&
+  !$("#notes-dialog")?.open &&
+  !$("#history-dialog")?.open
+) {
+      event.preventDefault();
+      $("#search-input")?.focus();
+    }
+  });
+
+  $("#previous-month")?.addEventListener("click", () => {
+    state.calendarDate = new Date(
+      state.calendarDate.getFullYear(),
+      state.calendarDate.getMonth() - 1,
+      1
+    );
+    renderCalendar();
+  });
+
+  $("#next-month")?.addEventListener("click", () => {
+    state.calendarDate = new Date(
+      state.calendarDate.getFullYear(),
+      state.calendarDate.getMonth() + 1,
+      1
+    );
+    renderCalendar();
+  });
+
+  $("#close-notes")?.addEventListener("click", () => $("#notes-dialog")?.close());
+  $("#note-form")?.addEventListener("submit", submitNote);
+  $("#cancel-edit")?.addEventListener("click", clearNoteForm);
+  $("#export-notes")?.addEventListener("click", exportNotesToJson);
+  $("#import-notes")?.addEventListener("change", importNotesFromJson);
+
+  $("#refresh-bookmarks")?.addEventListener("click", loadBookmarks);
+  $("#bookmark-search")?.addEventListener("input", (event) => {
+    filterBookmarkTree(event.target.value);
+  });
+  $("#clear-bookmark-search")?.addEventListener("click", clearBookmarkSearch);
+
+  $("#history-button")?.addEventListener("click", openHistoryDialog);
+  $("#close-history")?.addEventListener("click", closeHistoryDialog);
+  $("#refresh-history")?.addEventListener("click", loadRecentHistory);
+  $("#history-search")?.addEventListener("input", (event) => {
+    filterHistory(event.target.value);
+  });
+  $("#clear-history-search")?.addEventListener("click", clearHistorySearch);
+}
+
 async function initialize() {
   updateTime();
   setInterval(updateTime, 1000);
 
   renderCalendar();
-
-  $("#daily-quote").textContent =
-    QUOTES[Math.floor(Date.now() / 86400000) % QUOTES.length];
+  $("#daily-quote").textContent = QUOTES[Math.floor(Date.now() / 86400000) % QUOTES.length];
 
   setupEvents();
-
-  // Đọc danh sách Truy cập nhanh từ data/sites.local.json.
-  // Nếu không có file local, dùng data/sites.example.json.
   await loadConfiguredSites();
 
   loadWeather();
-
   loadBookmarks();
   watchBookmarks();
-
-  loadRecentHistory();
   watchHistory();
 }
-
-initialize();
 
 initialize();
