@@ -103,6 +103,7 @@ Danh sách được lưu cục bộ trong Brave với khóa:
 ```text
 tdv-sites
 ```
+add file "site.local.json" to data
 
 ## Bookmark
 
