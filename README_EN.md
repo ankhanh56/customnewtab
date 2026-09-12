@@ -1,18 +1,20 @@
-# Thiên Dật Vũ — 天逸宇 | Brave New Tab
+# Cục Bột · An Khánh | New Tab
+
+Extension New Tab cá nhân: dashboard tối, đồng hồ, lịch có note, thời tiết theo vị trí máy, Google Smart Search, Truy cập nhanh và cây Bookmark.
 
 <p align="center">
   <a href="README.md">Tiếng Việt</a>
 </p>
 
-> **This project was created with the assistance of AI. It has no private backend or server operated by the author. You can download the source code, inspect it, and customize it for your own needs.**
+> **This project was created with the assistance of AI. It has NO private backend or server operated by the author. You can download the source code, inspect it, and customize it for your own needs.**
 
 A personal New Tab extension for Brave/Chrome with a clock, calendar notes, device-based weather, Google Smart Search, quick links, bookmarks, and a browsing-history popup.
 
 ## Features
 
 - Real-time clock, date, greeting, and calendar.
-- Calendar notes: add, edit, delete, and optional JSON import/export controls if enabled in the current interface.
-- Weather based on the device location; coordinates are cached locally for up to 7 days.
+- Calendar notes: add, edit, delete, and optional JSON import/export controls.
+- Weather based on the device location; coordinates are cached locally default 7 days.
 - Google Smart Search: search Google with regular text, or open a domain, URL, LAN IP, or `localhost` directly.
 - Quick links loaded from a separate JSON file.
 - Expandable and accent-insensitive searchable bookmark tree.
@@ -42,7 +44,7 @@ Reloading is required after changing `manifest.json`.
 ## Folder structure
 
 ```text
-thien-dat-vu-new-tab/
+custom-new-tab/
 ├── data/
 │   ├── sites.example.json
 │   └── sites.local.json       # Personal configuration, ignored by Git
@@ -54,6 +56,41 @@ thien-dat-vu-new-tab/
 ├── README.md                  # Vietnamese
 └── README_EN.md               # English
 ```
+
+
+## Device Location Weather
+
+The dashboard uses Brave’s Geolocation API to retrieve the current device coordinates, then fetches weather data from Open-Meteo.
+
+In app.js, the fallback configuration looks like this:
+
+```javascript
+const WEATHER_FALLBACK_LOCATION = {
+  latitude: 10.789359,
+  longitude: 106.652784,
+  label: "Ho Chi Minh City",
+};
+```
+
+| Situation | Result |
+|---|---|
+| Location permission allowed | Displays weather based on the device’s current location. |
+| Location permission blocked or denied | Uses Ho Chi Minh City as the fallback weather location. |
+| No Internet connection | Weather data cannot be loaded. |
+
+If you previously blocked location permission, open the dashboard → click the page controls/site information icon on the left side of the address bar → find **Location** → change it to **Allow** → reload the tab.
+
+Your `manifest.json` must include the following host permissions:
+
+```json
+"host_permissions": [
+  "https://api.open-meteo.com/*",
+  "https://geocoding-api.open-meteo.com/*",
+  "https://www.google.com/*"
+]
+```
+
+
 
 ## Quick links
 
@@ -82,32 +119,6 @@ Example:
 
 After editing the JSON file, save it → open `brave://extensions` → click **Reload**.
 
-## GitHub
-
-Create a `.gitignore` file in the project root to keep personal links out of GitHub:
-
-```gitignore
-data/sites.local.json
-```
-
-Or use a broader rule:
-
-```gitignore
-data/*.local.json
-```
-
-Keep `data/sites.example.json` in the repository as a public example.
-
-If `sites.local.json` was already committed:
-
-```bash
-git rm --cached data/sites.local.json
-git add .gitignore
-git commit -m "Ignore local quick links config"
-git push
-```
-
-This removes the file from Git tracking without deleting it from your computer.
 
 ## Bookmarks and history
 
@@ -124,10 +135,55 @@ Your `manifest.json` must include:
 - **History** opens through the `◷` button and lists recently visited pages in a popup.
 - Brave Sync handles bookmark synchronization between devices; the dashboard only reads bookmarks available in the local Brave profile.
 
+
+## Rename
+
+Edit the following values in `newtab.html`:
+
+```html
+<title>Cục Bột · An Khánh</title>
+<span>LHAnKhánh <b>— 天逸宇</b></span>
+<h1>Thiên Dật Vũ</h1>
+```
+
+To change the extension name shown on `brave://extensions`, edit the `name` field in `manifest.json`, then Reload the extension.
+
+## Customize the Weather Location Cache Duration
+
+To change the cache duration from 7 days to another period, edit this line:
+
+```javascript
+const WEATHER_LOCATION_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+```
+
+Examples:
+
+```javascript
+// 1 ngày
+const WEATHER_LOCATION_CACHE_TTL = 24 * 60 * 60 * 1000;
+
+// 30 ngày
+const WEATHER_LOCATION_CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
+```
+
+## Troubleshooting
+
+- The dashboard does not appear: Make sure the extension is enabled and that no other New Tab extension is causing a conflict.
+
+- The old interface is still displayed: Reload the extension, close the old tab, and open a new tab.
+
+- Bookmarks are empty: Check that the extension has the `bookmarks` permission, then reload the extension.
+
+- Weather does not load: Check your Internet connection, location permission, the Open-Meteo `host_permissions`, and the permissions granted to the extension.
+
+- Favicons do not appear: The website may not provide a favicon; the fallback icon will be displayed.
+
+
+
 ## Data and privacy
 
 - Calendar notes are stored locally in the Brave profile under `tdv-calendar-notes`.
-- Location is requested only when required for weather and cached for up to 7 days under `tdv-weather-location`.
+- Location is requested only when required for weather and cached default 7 days under `tdv-weather-location`.
 - Bookmarks and browsing history are read through Brave's internal APIs; the dashboard does not permanently copy browsing history.
 - Weather data is requested from Open-Meteo over HTTPS.
 - Favicons may be loaded from external favicon services, depending on the current `app.js` configuration.

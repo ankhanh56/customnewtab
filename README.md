@@ -1,17 +1,22 @@
+# Cục Bột · An Khánh | New Tab
+
+Extension New Tab cá nhân: dashboard tối, đồng hồ, lịch có note, thời tiết theo vị trí máy, Google Smart Search, Truy cập nhanh và cây Bookmark.
+
 <p align="center">
   <a href="README.md">Tiếng Việt</a>
   ·
   <a href="README_EN.md">English</a>
 </p>
-> **Project này được thực hiện với sự hỗ trợ của AI. Không có backend hoặc server riêng do tác giả vận hành. Bạn có thể tải source code, kiểm tra và tùy chỉnh lại theo nhu cầu.**
+
+> **Project này được thực hiện với sự hỗ trợ của AI. KHÔNG CÓ backend hoặc server riêng do tác giả vận hành. Bạn có thể tải source code, kiểm tra và tùy chỉnh lại theo nhu cầu.**
 
 Extension New Tab cá nhân cho Brave/Chrome với đồng hồ, lịch có note, thời tiết theo vị trí máy, Google Smart Search, Truy cập nhanh, Bookmark và popup lịch sử duyệt web.
 
 ## Tính năng
 
 - Đồng hồ, ngày tháng, lời chào và lịch tiếng Việt.
-- Ghi chú theo từng ngày: thêm, sửa, xóa và xuất/nhập JSON nếu bản giao diện đang có các nút này.
-- Thời tiết theo vị trí hiện tại của máy; tọa độ được cache cục bộ tối đa 7 ngày.
+- Ghi chú theo từng ngày: thêm, sửa, xóa và xuất/nhập JSON.
+- Thời tiết theo vị trí hiện tại của máy; tọa độ được cache cục bộ mặc định 7 ngày.
 - Google Smart Search: nhập từ khóa để tìm Google; nhập domain, URL, IP LAN hoặc `localhost` để mở trực tiếp.
 - Truy cập nhanh đọc từ file JSON riêng.
 - Bookmark hiển thị dạng cây, có tìm kiếm không dấu.
@@ -41,7 +46,7 @@ Nếu sửa `manifest.json`, bắt buộc phải Reload extension.
 ## Cấu trúc thư mục
 
 ```text
-thien-dat-vu-new-tab/
+custom-new-tab/
 ├── data/
 │   ├── sites.example.json
 │   └── sites.local.json       # Cấu hình cá nhân, không đưa lên GitHub
@@ -53,6 +58,41 @@ thien-dat-vu-new-tab/
 ├── README.md                  # Tiếng Việt
 └── README_EN.md               # English
 ```
+
+
+## Thời tiết vị trí máy
+
+Dashboard dùng Geolocation API của Brave để lấy tọa độ hiện tại, sau đó lấy thời tiết từ Open-Meteo.
+
+Trong `app.js`, cấu hình dự phòng có dạng:
+
+```javascript
+const WEATHER_FALLBACK_LOCATION = {
+  latitude: 10.789359,
+  longitude: 106.652784,
+  label: "TP. Hồ Chí Minh",
+};
+```
+
+| Tình huống | Kết quả |
+|---|---|
+| Cho phép vị trí | Hiển thị thời tiết theo vị trí thiết bị. |
+| Chặn/từ chối vị trí | Dùng thời tiết TP.Hồ Chí Minh dự phòng. |
+| Không có Internet | Không tải được dữ liệu thời tiết. |
+
+Nếu đã lỡ chặn quyền vị trí, mở dashboard → bấm biểu tượng điều khiển trang ở cạnh trái thanh địa chỉ → tìm **Location / Vị trí** → đổi sang **Allow / Cho phép** → tải lại tab.
+
+`manifest.json` phải có các quyền host sau:
+
+```json
+"host_permissions": [
+  "https://api.open-meteo.com/*",
+  "https://geocoding-api.open-meteo.com/*",
+  "https://www.google.com/*"
+]
+```
+
+
 
 ## Truy cập nhanh
 
@@ -81,32 +121,6 @@ Ví dụ:
 
 Sau khi sửa JSON: lưu file → vào `brave://extensions` → nhấn **Reload**.
 
-## GitHub
-
-Tạo `.gitignore` tại thư mục gốc để bỏ qua danh sách link cá nhân:
-
-```gitignore
-data/sites.local.json
-```
-
-Hoặc dùng quy tắc tổng quát hơn:
-
-```gitignore
-data/*.local.json
-```
-
-Giữ `data/sites.example.json` trong repository làm file mẫu public.
-
-Nếu `sites.local.json` từng được commit:
-
-```bash
-git rm --cached data/sites.local.json
-git add .gitignore
-git commit -m "Ignore local quick links config"
-git push
-```
-
-Lệnh này chỉ bỏ file khỏi Git, không xóa file trên máy.
 
 ## Bookmark và History
 
@@ -123,10 +137,50 @@ Lệnh này chỉ bỏ file khỏi Git, không xóa file trên máy.
 - **History** mở qua nút `◷`, hiển thị các trang gần đây trong popup.
 - Brave Sync là thành phần đồng bộ bookmark giữa các thiết bị; dashboard chỉ đọc dữ liệu đã có trong Brave.
 
+
+## Đổi tên
+
+Sửa trong `newtab.html`:
+
+```html
+<title>Cục Bột · An Khánh</title>
+<span>Thiên Dật Vũ <b>— 天逸宇</b></span>
+<h1>Thiên Dật Vũ</h1>
+```
+
+Để đổi tên extension ở `brave://extensions`, sửa trường `name` trong `manifest.json`, rồi Reload extension.
+
+## Tùy chỉnh thời hạn cache vị trí thời tiết
+
+Muốn thay 7 ngày thành thời hạn khác, sửa dòng:
+
+```javascript
+const WEATHER_LOCATION_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+```
+
+Ví dụ:
+
+```javascript
+// 1 ngày
+const WEATHER_LOCATION_CACHE_TTL = 24 * 60 * 60 * 1000;
+
+// 30 ngày
+const WEATHER_LOCATION_CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
+```
+
+## Khắc phục lỗi
+
+- Không hiện dashboard: kiểm tra extension đang bật và không có New Tab extension khác xung đột.
+- Giao diện cũ: Reload extension, đóng tab cũ rồi mở tab mới.
+- Bookmark trống: kiểm tra quyền `bookmarks` rồi Reload extension.
+- Weather không tải: kiểm tra Internet, quyền vị trí và các `host_permissions` Open-Meteo, xem lại quyền cấp phép cho extensions.
+- Favicon không hiện: site có thể không cung cấp favicon; icon fallback sẽ hiển thị.
+
+
 ## Dữ liệu và riêng tư
 
 - Note lịch được lưu cục bộ trong profile Brave với khóa `tdv-calendar-notes`.
-- Vị trí chỉ được lấy khi cần tải thời tiết và được cache tối đa 7 ngày với khóa `tdv-weather-location`.
+- Vị trí chỉ được lấy khi cần tải thời tiết và được cache mặc định 7 ngày với khóa `tdv-weather-location`.
 - Bookmark và history được đọc bằng API nội bộ của Brave; dashboard không tạo bản sao cố định của history.
 - Thời tiết gọi Open-Meteo qua HTTPS.
 - Favicon có thể được tải từ dịch vụ favicon bên ngoài, tùy cấu hình `app.js`.
