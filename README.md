@@ -1,16 +1,19 @@
 # Cục Bột · An Khánh | New Tab
 
-Extension New Tab cá nhân: dashboard tối, đồng hồ, lịch có note, thời tiết theo vị trí máy, Google Smart Search, Truy cập nhanh và cây Bookmark.
-
 <p align="center">
   <a href="README.md">Tiếng Việt</a>
   ·
   <a href="README_EN.md">English</a>
 </p>
 
+
+Extension New Tab cá nhân: dashboard tối, đồng hồ, lịch có note, thời tiết theo vị trí máy, Google Smart Search, Truy cập nhanh và cây Bookmark.
+
+> [!NOTE]
 > **Project này được thực hiện với sự hỗ trợ của AI. KHÔNG CÓ backend hoặc server riêng do tác giả vận hành. Bạn có thể tải source code, kiểm tra và tùy chỉnh lại theo nhu cầu.**
 
-Extension New Tab cá nhân cho Brave/Chrome với đồng hồ, lịch có note, thời tiết theo vị trí máy, Google Smart Search, Truy cập nhanh, Bookmark và popup lịch sử duyệt web.
+![New Tab](/img/chrome_uJMffqdA6r.png)
+
 
 ## Tính năng
 
@@ -188,4 +191,7 @@ const WEATHER_LOCATION_CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
 
 ## Tùy chỉnh
 
-Bạn có thể tự do tải source code, đọc mã và chỉnh sửa giao diện, dữ liệu site, tên hiển thị, màu sắc hoặc chức năng theo nhu cầu cá nhân.
+Bạn có thể tự do tải source code, đọc mã và chỉnh sửa giao diện, dữ liệu site, tên hiển thị, màu sắc hoặc chức năng theo nhu cầu cá nhân( có thể dùng AI chỉnh lại).
+
+> [!CAUTION]
+> **Dự án này được tạo ra với sự hỗ trợ của trí tuệ nhân tạo và được tùy chỉnh theo sở thích cá nhân của tôi. Nó không thu thập, lưu trữ hoặc truyền tải bất kỳ thông tin cá nhân nào từ bạn.**

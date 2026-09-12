@@ -1,14 +1,18 @@
 # Cục Bột · An Khánh | New Tab
 
-Extension New Tab cá nhân: dashboard tối, đồng hồ, lịch có note, thời tiết theo vị trí máy, Google Smart Search, Truy cập nhanh và cây Bookmark.
 
 <p align="center">
   <a href="README.md">Tiếng Việt</a>
 </p>
 
-> **This project was created with the assistance of AI. It has NO private backend or server operated by the author. You can download the source code, inspect it, and customize it for your own needs.**
+
 
 A personal New Tab extension for Brave/Chrome with a clock, calendar notes, device-based weather, Google Smart Search, quick links, bookmarks, and a browsing-history popup.
+
+>[!NOTE]
+> **This project was created with the assistance of AI. It has NO private backend or server operated by the author. You can download the source code, inspect it, and customize it for your own needs.**
+
+![New Tab](/img/chrome_uJMffqdA6r.png)
 
 ## Features
 
@@ -191,4 +195,8 @@ const WEATHER_LOCATION_CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
 
 ## Customization
 
-You are free to download the source code, inspect it, and customize the UI, quick-link data, displayed name, colors, and features for personal use.
+You are free to download the source code, inspect it, and customize the UI, quick-link data, displayed name, colors, and features for personal use(maybe use AI to edit).
+
+
+> [!CAUTION]
+> **This project was created with the assistance of AI and customized according to my personal preferences. It does not collect, store, or transmit any personal information from you.**
