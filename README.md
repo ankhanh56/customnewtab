@@ -31,9 +31,15 @@ Extension New Tab cá nhân: dashboard tối, đồng hồ, lịch có note, th�
 1. Mở Brave và truy cập `brave://extensions`.
 2. Bật **Developer mode / Chế độ nhà phát triển**.
 3. Nhấn **Load unpacked / Tải tiện ích đã giải nén**.
-4. Chọn thư mục chứa `manifest.json`.
+4. Chọn thư mục bạn đã tải về và giải nén nó.
 5. Mở tab mới bằng `Ctrl + T`.
 6. Cho phép quyền vị trí nếu muốn hiển thị thời tiết theo vị trí máy.
+
+## Gỡ cài đặt
+
+1. Mở Brave và truy cập `brave://extensions`.
+2. mở File Explorer tìm đến thư mục đã tải và giải nén file trước đó và **Xoá** đi.
+
 
 Chỉ nên bật một extension ghi đè New Tab để tránh xung đột.
 

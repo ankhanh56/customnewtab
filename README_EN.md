@@ -30,11 +30,16 @@ A personal New Tab extension for Brave/Chrome with a clock, calendar notes, devi
 1. Open Brave and visit `brave://extensions`.
 2. Enable **Developer mode**.
 3. Click **Load unpacked**.
-4. Select the folder that contains `manifest.json`.
+4. Select the folder your download and unzip.
 5. Open a new tab with `Ctrl + T`.
 6. Allow location access if you want weather based on the device location.
 
 Only one New Tab override extension should be enabled to avoid conflicts.
+
+## Uninstall
+
+1. Open Brave and visit `brave://extensions`.
+2. Click **Remove** and open File Explorer find your download and zip **Delete** it.
 
 ## Updating
 
