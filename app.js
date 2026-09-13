@@ -382,7 +382,7 @@ function saveNotes() {
 
 function updateTime() {
   const now = new Date();
-  $("#clock").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  $("#clock").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
   $("#full-date").textContent = new Intl.DateTimeFormat("vi-VN", {
     weekday: "long",
